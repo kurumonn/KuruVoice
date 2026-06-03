@@ -1,0 +1,53 @@
+# KuruVoice 設定ファイル例 (config.example.toml)
+# `kuruvoice --config config.toml` で読み込めます。
+# 値は GUI のスライダーとも対応します。設計書 4.5 を参照。
+
+[app]
+# 起動時に適用するプリセット:
+# natural_low / ikemen_soft / ikemen_deep / narrator / clear_streaming / radio_voice
+preset = "ikemen_soft"
+# true にすると加工せず素通し（バイパス）
+bypass = false
+
+[audio]
+# デバイス名。"default" でOS既定。`kuruvoice --list-devices` で名前を確認。
+input_device = "default"
+output_device = "default"
+sample_rate = 48000
+buffer_size = 256
+channels = 1
+
+[voice]
+# ピッチ（半音）。-3.0 で自然な低音。
+pitch_semitones = -3.0
+# フォルマント補正。負で「太く」、正で「細く」。
+formant_shift = -0.8
+# 加工音と原音のミックス（1.0 = 完全に加工音）。
+mix = 1.0
+
+[noise_gate]
+enabled = true
+threshold_db = -45.0
+attack_ms = 5
+release_ms = 80
+
+[eq]
+enabled = true
+high_pass_hz = 80.0      # これ以下をカット
+low_boost_db = 1.5       # 低音感
+mud_cut_db = -2.0        # こもり帯域カット
+presence_boost_db = 2.0  # 明瞭感ブースト
+de_esser_db = -2.5       # 歯擦音抑制
+
+[compressor]
+enabled = true
+threshold_db = -18.0
+ratio = 3.0
+attack_ms = 8
+release_ms = 120
+makeup_gain_db = 3.0
+
+[limiter]
+enabled = true
+ceiling_db = -1.0        # 最大音量（音割れ防止）
+release_ms = 50

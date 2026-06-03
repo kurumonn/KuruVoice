@@ -1,0 +1,36 @@
+[package]
+name = "kuruvoice"
+version = "0.1.0"
+edition = "2021"
+description = "KuruVoice - 軽量リアルタイム・イケメンボイスチェンジャー (DSP voice changer with dashboard UI)"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/your-name/kuruvoice"
+readme = "README.md"
+keywords = ["audio", "voice", "dsp", "realtime", "voicechanger"]
+categories = ["multimedia::audio"]
+
+[[bin]]
+name = "kuruvoice"
+path = "src/main.rs"
+
+[dependencies]
+cpal = "0.15"
+ringbuf = "0.3"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+clap = { version = "4", features = ["derive"] }
+anyhow = "1"
+thiserror = "1"
+log = "0.4"
+env_logger = "0.11"
+hound = "3"
+eframe = { version = "0.29", default-features = true }
+egui = "0.29"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+
+[profile.dev]
+opt-level = 1
