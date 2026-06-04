@@ -10,6 +10,7 @@ pub mod cli;
 pub mod config;
 pub mod dsp;
 pub mod error;
+pub mod eval;
 pub mod gui;
 pub mod preset;
 pub mod voice_character;

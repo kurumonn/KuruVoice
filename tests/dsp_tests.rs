@@ -1,7 +1,9 @@
 //! DSP 単体・結合テスト。設計書 7.1 / 7.2。
 
 use kuruvoice::config::AppConfig;
-use kuruvoice::dsp::{db_to_gain, gain_to_db, semitones_to_ratio, DspChain};
+use kuruvoice::dsp::biquad::Biquad;
+use kuruvoice::dsp::deesser::DeEsser;
+use kuruvoice::dsp::{db_to_gain, gain_to_db, semitones_to_ratio, AudioProcessor, DspChain};
 
 #[test]
 fn db_conversion() {
@@ -74,5 +76,51 @@ fn signal_chain_order() {
     let chain = DspChain::from_config(&cfg, 48000.0, 128);
     let names = chain.names();
     assert_eq!(names.first(), Some(&"dc_block"));
+    assert!(names.contains(&"deesser"));
+    let eq_pos = names.iter().position(|name| *name == "eq").unwrap();
+    let deesser_pos = names.iter().position(|name| *name == "deesser").unwrap();
+    let compressor_pos = names.iter().position(|name| *name == "compressor").unwrap();
+    assert!(eq_pos < deesser_pos);
+    assert!(deesser_pos < compressor_pos);
     assert_eq!(names.last(), Some(&"limiter"));
+}
+
+#[test]
+fn deesser_reduces_sibilance_band_energy() {
+    let mut cfg = AppConfig::default();
+    cfg.deesser.enabled = true;
+    cfg.deesser.frequency_hz = 5000.0;
+    cfg.deesser.threshold_db = -60.0;
+    cfg.deesser.ratio = 8.0;
+    cfg.deesser.max_reduction_db = 18.0;
+
+    let mut deesser = DeEsser::new(&cfg.deesser);
+    deesser.prepare(48000.0, 512);
+
+    let mut buf: Vec<f32> = (0..4096)
+        .map(|i| {
+            let t = i as f32 / 48000.0;
+            (std::f32::consts::TAU * 7000.0 * t).sin() * 0.35
+        })
+        .collect();
+    fn high_band_energy(input: &[f32]) -> f32 {
+        let mut hp = Biquad::high_pass(48000.0, 5000.0, 0.707);
+        input
+            .iter()
+            .map(|sample| {
+                let high = hp.process(*sample);
+                high * high
+            })
+            .sum::<f32>()
+    }
+
+    let before = high_band_energy(&buf);
+    deesser.process(&mut buf);
+    let after = high_band_energy(&buf);
+
+    assert!(
+        after < before * 0.75,
+        "deesser should reduce strong sibilance energy"
+    );
+    assert!(buf.iter().all(|sample| sample.is_finite()));
 }

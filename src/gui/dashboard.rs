@@ -146,8 +146,10 @@ impl eframe::App for Dashboard {
                 self.character_section(ui, &mut dirty);
                 self.voice_section(ui, &mut dirty);
                 self.denoise_section(ui, &mut dirty);
+                self.auto_gain_section(ui, &mut dirty);
                 self.noise_gate_section(ui, &mut dirty);
                 self.eq_section(ui, &mut dirty);
+                self.harmonic_section(ui, &mut dirty);
                 self.compressor_section(ui, &mut dirty);
                 self.limiter_section(ui, &mut dirty);
                 ui.add_space(8.0);
@@ -490,6 +492,45 @@ impl Dashboard {
         );
     }
 
+    fn auto_gain_section(&mut self, ui: &mut egui::Ui, dirty: &mut bool) {
+        section(ui, "オートゲイン (音量自動調整)", |ui| {
+            *dirty |= ui
+                .checkbox(&mut self.config.auto_gain.enabled, "有効")
+                .changed();
+            ui.add_enabled_ui(self.config.auto_gain.enabled, |ui| {
+                slider(
+                    ui,
+                    dirty,
+                    "目標レベル",
+                    &mut self.config.auto_gain.target_db,
+                    -40.0..=-6.0,
+                    " dB",
+                );
+                slider(
+                    ui,
+                    dirty,
+                    "最大ブースト",
+                    &mut self.config.auto_gain.max_gain_db,
+                    0.0..=30.0,
+                    " dB",
+                );
+                slider(
+                    ui,
+                    dirty,
+                    "無音ゲート",
+                    &mut self.config.auto_gain.gate_db,
+                    -70.0..=-30.0,
+                    " dB",
+                );
+                ui.label(
+                    egui::RichText::new("小さい声/大きい声を自動で均す。無音は持ち上げない。")
+                        .small()
+                        .color(egui::Color32::from_gray(150)),
+                );
+            });
+        });
+    }
+
     fn noise_gate_section(&mut self, ui: &mut egui::Ui, dirty: &mut bool) {
         section(ui, "ノイズゲート", |ui| {
             *dirty |= ui
@@ -567,6 +608,47 @@ impl Dashboard {
                     &mut self.config.eq.de_esser_db,
                     -12.0..=0.0,
                     " dB",
+                );
+            });
+        });
+    }
+
+    fn harmonic_section(&mut self, ui: &mut egui::Ui, dirty: &mut bool) {
+        section(ui, "ハーモニック (倍音で芯/艶を補強)", |ui| {
+            *dirty |= ui
+                .checkbox(&mut self.config.harmonic.enabled, "有効")
+                .changed();
+            ui.add_enabled_ui(self.config.harmonic.enabled, |ui| {
+                slider(
+                    ui,
+                    dirty,
+                    "効き",
+                    &mut self.config.harmonic.amount,
+                    0.0..=1.0,
+                    "",
+                );
+                slider(
+                    ui,
+                    dirty,
+                    "芯/太さ",
+                    &mut self.config.harmonic.warmth,
+                    0.0..=1.0,
+                    "",
+                );
+                slider(
+                    ui,
+                    dirty,
+                    "艶/明るさ",
+                    &mut self.config.harmonic.brightness,
+                    0.0..=1.0,
+                    "",
+                );
+                ui.label(
+                    egui::RichText::new(
+                        "上げた声の「細い・芯がない」を倍音で補強。強すぎると歪み。",
+                    )
+                    .small()
+                    .color(egui::Color32::from_gray(150)),
                 );
             });
         });

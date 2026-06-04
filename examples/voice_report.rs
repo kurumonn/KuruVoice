@@ -153,6 +153,10 @@ fn main() {
     );
 
     let presets = [
+        ("neutral_clean", VoicePreset::NeutralClean),
+        ("soft_feminine", VoicePreset::SoftFeminine),
+        ("bright_feminine", VoicePreset::BrightFeminine),
+        ("young_neutral", VoicePreset::YoungNeutral),
         ("natural_low", VoicePreset::NaturalLow),
         ("ikemen_soft", VoicePreset::IkemenSoft),
         ("ikemen_deep", VoicePreset::IkemenDeep),
@@ -164,7 +168,10 @@ fn main() {
     ];
 
     for (name, p) in presets {
-        let cfg = PresetManager::load(p);
+        let mut cfg = PresetManager::load(p);
+        // この計測はピッチ/フォルマント/音色を測るもの。デノイザは「定常的な合成トーン」を
+        // ノイズと誤判定して抑制してしまう（実音声＝非定常では起きにくい）ため、計測時は無効化。
+        cfg.denoise.enabled = false;
         let out = process(&cfg, &input);
 
         let out_f0 = detect_f0(&out[pitch_seg.clone()]);

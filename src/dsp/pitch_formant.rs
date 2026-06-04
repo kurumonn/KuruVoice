@@ -22,6 +22,7 @@ const OVERSAMP: usize = 4;
 const HOP: usize = FFT_SIZE / OVERSAMP; // 256
 const HALF: usize = FFT_SIZE / 2; // 512
 const LIFTER: usize = 40; // ケプストラム・リフター幅（包絡の滑らかさ）
+const FORMANT_FOLLOW: f32 = 0.5; // ピッチ変化に対し包絡を追従させる割合 (0=保持, 1=完全追従)
 const NORM: f32 = 1.0 / (1.5 * FFT_SIZE as f32); // Hann 75% OLA + 非正規化 iFFT の補正
 
 fn czero() -> Complex<f32> {
@@ -147,21 +148,36 @@ impl PitchFormant {
         // スペクトル包絡（ケプストラム・リフター）
         self.compute_envelope();
 
-        // 励起の白色化 → ピッチシフト → 包絡を伸縮して再付与
+        // 励起の白色化（包絡を割って平坦化した「ピッチ成分」）
         for k in 0..=HALF {
             self.white[k] = self.ana_magn[k] / (self.env[k] + 1e-9);
-            self.syn_white[k] = 0.0;
-            self.syn_freq[k] = 0.0;
         }
-        for k in 0..=HALF {
-            let index = (k as f32 * self.pitch_ratio).round() as usize;
-            if index <= HALF {
-                self.syn_white[index] += self.white[k];
-                self.syn_freq[index] = self.ana_freq[k] * self.pitch_ratio;
+        // ピッチシフト = スペクトル・リサンプル（backward gather）。
+        // 「ソースを撒く(forward scatter)」と上げ時に目標がスカスカ＝コム状になり
+        // 金属的/細くなるため、**目標ビンごとにソース側 s=j/ratio を線形補間で読む**。
+        // これで目標スペクトルが密になり、女性声/中性声の金属感を抑えられる (KV-DSP-3)。
+        let inv_pitch = 1.0 / self.pitch_ratio;
+        for j in 0..=HALF {
+            let s = j as f32 * inv_pitch;
+            let i0 = s.floor() as usize;
+            if i0 >= HALF {
+                // 元のナイキストを超える領域は無音（エイリアス防止）
+                self.syn_white[j] = 0.0;
+                self.syn_freq[j] = 0.0;
+                continue;
             }
+            let i1 = i0 + 1; // i0 < HALF なので i1 <= HALF（配列長 HALF+1）
+            let frac = s - i0 as f32;
+            self.syn_white[j] = self.white[i0] * (1.0 - frac) + self.white[i1] * frac;
+            self.syn_freq[j] =
+                (self.ana_freq[i0] * (1.0 - frac) + self.ana_freq[i1] * frac) * self.pitch_ratio;
         }
+        // フォルマント・フォロー: ピッチ変化に合わせて包絡も部分的に動かす。
+        // follow=0 で完全保持(元の声のまま)、1 で完全追従(チップマンク)。
+        // 高い声を上げたとき「こもって弱い」のを防ぐため、既定で半分追従させる。
+        let env_ratio = self.formant_ratio * self.pitch_ratio.powf(FORMANT_FOLLOW);
         for k in 0..=HALF {
-            let src = ((k as f32 / self.formant_ratio).round() as isize).clamp(0, HALF as isize);
+            let src = ((k as f32 / env_ratio).round() as isize).clamp(0, HALF as isize);
             self.syn_magn[k] = self.syn_white[k] * self.env[src as usize];
         }
 
@@ -389,5 +405,61 @@ mod tests {
         }
         assert!(buf.iter().all(|s| s.is_finite()));
         assert!(buf.iter().all(|s| s.abs() < 4.0), "極端に増幅されないこと");
+    }
+
+    fn rms(x: &[f32]) -> f32 {
+        (x.iter().map(|v| v * v).sum::<f32>() / x.len() as f32).sqrt()
+    }
+
+    /// KV-DSP-3 回帰: 上げても目標スペクトルが密（コム状の深い null が少ない）で、
+    /// エネルギーが保たれること。gather 方式の効果を担保する。
+    #[test]
+    fn upshift_is_dense_and_keeps_energy() {
+        let mut pf = PitchFormant::new(&voice(7.0, 0.0));
+        pf.prepare(48000.0, 256);
+        // 疑似ホワイトノイズ
+        let mut seed: u32 = 987_654_321;
+        let mut buf: Vec<f32> = (0..48000)
+            .map(|_| {
+                seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);
+                ((seed >> 9) as f32 / (1u32 << 23) as f32 - 1.0) * 0.3
+            })
+            .collect();
+        let in_rms = rms(&buf[24000..40000]);
+        for b in buf.chunks_mut(256) {
+            pf.process(b);
+        }
+        let out_rms = rms(&buf[24000..40000]);
+        assert!(buf.iter().all(|s| s.is_finite()));
+        assert!(
+            out_rms > in_rms * 0.3,
+            "上げてもエネルギーを保つ: {in_rms} -> {out_rms}"
+        );
+
+        // 300〜6000Hz 帯で「中央値の 5% 未満」の深い null の割合が小さいこと
+        let n = 16384usize;
+        let start = 24000;
+        let mut planner = FftPlanner::<f32>::new();
+        let fft = planner.plan_fft_forward(n);
+        let mut spec: Vec<Complex<f32>> = (0..n)
+            .map(|i| {
+                let w = 0.5 * (1.0 - (2.0 * PI * i as f32 / n as f32).cos());
+                Complex::new(buf[start + i] * w, 0.0)
+            })
+            .collect();
+        fft.process(&mut spec);
+        let bin = 48000.0 / n as f32;
+        let lo = (300.0 / bin) as usize;
+        let hi = (6000.0 / bin) as usize;
+        let mags: Vec<f32> = (lo..hi).map(|k| spec[k].norm()).collect();
+        let mut sorted = mags.clone();
+        sorted.sort_by(|a, b| a.total_cmp(b));
+        let median = sorted[sorted.len() / 2].max(1e-12);
+        let deep = mags.iter().filter(|m| **m < median * 0.05).count();
+        let frac = deep as f32 / mags.len() as f32;
+        assert!(
+            frac < 0.35,
+            "コム状の深い null が多すぎる(密でない): {frac}"
+        );
     }
 }

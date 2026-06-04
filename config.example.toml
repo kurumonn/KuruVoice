@@ -4,6 +4,7 @@
 
 [app]
 # 起動時に適用するプリセット:
+# neutral_clean / soft_feminine / bright_feminine / young_neutral
 # natural_low / ikemen_soft / ikemen_deep / narrator / clear_streaming / radio_voice
 preset = "ikemen_soft"
 # true にすると加工せず素通し（バイパス）
@@ -31,6 +32,13 @@ enabled = false
 # 低減強度 0.0〜1.0（大きいほど強く除去。かけすぎると声が不自然に）。
 amount = 0.5
 
+[auto_gain]
+# 小さい声/大きい声を目標レベルへ自動で均す（AGC）。
+enabled = false
+target_db = -20.0    # 目標 RMS
+max_gain_db = 18.0   # 最大ブースト（ノイズ増幅防止の頭打ち）
+gate_db = -50.0      # これ以下は持ち上げない（無音時ポンピング防止）
+
 [noise_gate]
 enabled = true
 threshold_db = -45.0
@@ -44,6 +52,23 @@ low_boost_db = 1.5       # 低音感
 mud_cut_db = -2.0        # こもり帯域カット
 presence_boost_db = 2.0  # 明瞭感ブースト
 de_esser_db = -2.5       # 歯擦音抑制
+
+[deesser]
+# 歯擦音が強い瞬間だけ高域を抑える動的De-esser。高め/女性寄りプリセットで重要。
+enabled = true
+frequency_hz = 6200.0
+threshold_db = -28.0
+ratio = 3.0
+max_reduction_db = 8.0
+attack_ms = 2.0
+release_ms = 55.0
+
+[harmonic]
+# 倍音生成で上げた声の「細さ/芯のなさ」を補強。
+enabled = false
+amount = 0.3      # 効き 0.0〜1.0
+warmth = 0.6      # 芯/太さ（低中域の偶数次倍音）
+brightness = 0.5  # 艶/明るさ（高域の奇数次倍音）
 
 [compressor]
 enabled = true

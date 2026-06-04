@@ -17,8 +17,11 @@ pub struct AppConfig {
     pub audio: AudioSection,
     pub voice: VoiceSection,
     pub denoise: DenoiseSection,
+    pub auto_gain: AutoGainSection,
     pub noise_gate: NoiseGateSection,
     pub eq: EqSection,
+    pub harmonic: HarmonicSection,
+    pub deesser: DeEsserSection,
     pub compressor: CompressorSection,
     pub limiter: LimiterSection,
 }
@@ -94,6 +97,30 @@ impl Default for DenoiseSection {
     }
 }
 
+/// オートゲイン（AGC）。KV-IN-2 / FR-002。小さい声・大きい声を目標レベルへ
+/// 緩やかに均す。無音(ゲート以下)では利得を保持してノイズを増幅しない。
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct AutoGainSection {
+    pub enabled: bool,
+    /// 目標 RMS レベル(dBFS)。
+    pub target_db: f32,
+    /// 最大ブースト量(dB)。これ以上は持ち上げない（ノイズ増幅防止）。
+    pub max_gain_db: f32,
+    /// この入力レベル(dBFS)以下では利得を更新せず保持する（無音時のポンピング防止）。
+    pub gate_db: f32,
+}
+impl Default for AutoGainSection {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            target_db: -20.0,
+            max_gain_db: 18.0,
+            gate_db: -50.0,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct NoiseGateSection {
@@ -132,6 +159,58 @@ impl Default for EqSection {
             mud_cut_db: -2.0,
             presence_boost_db: 2.0,
             de_esser_db: -2.5,
+        }
+    }
+}
+
+/// 動的 De-esser。EQ の静的ハイシェルフとは別に、サ行・歯擦音が強い瞬間だけ
+/// 高域成分を抑える。女性声・高めプリセットの刺さり対策に使う。
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct DeEsserSection {
+    pub enabled: bool,
+    pub frequency_hz: f32,
+    pub threshold_db: f32,
+    pub ratio: f32,
+    pub max_reduction_db: f32,
+    pub attack_ms: f32,
+    pub release_ms: f32,
+}
+impl Default for DeEsserSection {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            frequency_hz: 6200.0,
+            threshold_db: -28.0,
+            ratio: 3.0,
+            max_reduction_db: 8.0,
+            attack_ms: 2.0,
+            release_ms: 55.0,
+        }
+    }
+}
+
+/// ハーモニック・エンハンサー（倍音生成）。KV-DSP-1。
+/// 上げた声（女性/中性）が「細い・芯がない」のを、低中域の偶数次倍音（太さ）と
+/// 高域の奇数次倍音（艶/密度）を足して補強する。
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct HarmonicSection {
+    pub enabled: bool,
+    /// 効き 0.0〜1.0（大きいほど倍音を強く付加。かけすぎると歪む）。
+    pub amount: f32,
+    /// 「芯/太さ」（低中域の偶数次倍音）の比率 0.0〜1.0。
+    pub warmth: f32,
+    /// 「艶/密度」（高域の奇数次倍音）の比率 0.0〜1.0。
+    pub brightness: f32,
+}
+impl Default for HarmonicSection {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            amount: 0.3,
+            warmth: 0.6,
+            brightness: 0.5,
         }
     }
 }

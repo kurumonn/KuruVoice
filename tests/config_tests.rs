@@ -10,6 +10,7 @@ fn default_config_is_ikemen_soft() {
     assert_eq!(cfg.app.preset, "ikemen_soft");
     assert_eq!(cfg.audio.sample_rate, 48000);
     assert!(cfg.limiter.enabled);
+    assert!(cfg.deesser.enabled);
 }
 
 #[test]
@@ -33,6 +34,7 @@ fn partial_toml_uses_defaults() {
     // 他はデフォルト
     assert_eq!(cfg.audio.sample_rate, 48000);
     assert!(cfg.eq.enabled);
+    assert!(cfg.deesser.enabled);
 }
 
 #[test]
@@ -49,6 +51,10 @@ fn preset_parsing() {
         VoicePreset::from_str("radio-voice").unwrap(),
         VoicePreset::RadioVoice
     );
+    assert_eq!(
+        VoicePreset::from_str("Soft Feminine").unwrap(),
+        VoicePreset::SoftFeminine
+    );
     assert!(VoicePreset::from_str("unknown").is_err());
 }
 
@@ -57,6 +63,14 @@ fn preset_values_match_spec() {
     // 4.4 の代表値を確認
     let natural = PresetManager::load(VoicePreset::NaturalLow);
     assert_eq!(natural.voice.pitch_semitones, -2.0);
+
+    let neutral = PresetManager::load(VoicePreset::NeutralClean);
+    assert_eq!(neutral.voice.pitch_semitones, 2.5);
+    assert!(neutral.denoise.enabled);
+
+    let soft = PresetManager::load(VoicePreset::SoftFeminine);
+    assert_eq!(soft.voice.pitch_semitones, 5.0);
+    assert!(soft.deesser.max_reduction_db >= 8.0);
 
     let deep = PresetManager::load(VoicePreset::IkemenDeep);
     assert_eq!(deep.voice.pitch_semitones, -4.0);

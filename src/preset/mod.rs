@@ -9,6 +9,10 @@ use std::str::FromStr;
 /// 用途別ボイスプリセット。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VoicePreset {
+    NeutralClean,
+    SoftFeminine,
+    BrightFeminine,
+    YoungNeutral,
     NaturalLow,
     IkemenSoft,
     IkemenDeep,
@@ -21,8 +25,12 @@ pub enum VoicePreset {
 
 impl VoicePreset {
     /// 全プリセットを定義順で返す（GUI のボタン生成などに使う）。
-    pub fn all() -> [VoicePreset; 8] {
+    pub fn all() -> [VoicePreset; 12] {
         [
+            VoicePreset::NeutralClean,
+            VoicePreset::SoftFeminine,
+            VoicePreset::BrightFeminine,
+            VoicePreset::YoungNeutral,
             VoicePreset::NaturalLow,
             VoicePreset::IkemenSoft,
             VoicePreset::IkemenDeep,
@@ -37,6 +45,10 @@ impl VoicePreset {
     /// 設定ファイル等で使うスネークケースのキー。
     pub fn key(&self) -> &'static str {
         match self {
+            VoicePreset::NeutralClean => "neutral_clean",
+            VoicePreset::SoftFeminine => "soft_feminine",
+            VoicePreset::BrightFeminine => "bright_feminine",
+            VoicePreset::YoungNeutral => "young_neutral",
             VoicePreset::NaturalLow => "natural_low",
             VoicePreset::IkemenSoft => "ikemen_soft",
             VoicePreset::IkemenDeep => "ikemen_deep",
@@ -51,6 +63,10 @@ impl VoicePreset {
     /// 画面表示用の名前。
     pub fn label(&self) -> &'static str {
         match self {
+            VoicePreset::NeutralClean => "Neutral Clean",
+            VoicePreset::SoftFeminine => "Soft Feminine",
+            VoicePreset::BrightFeminine => "Bright Feminine",
+            VoicePreset::YoungNeutral => "Young Neutral",
             VoicePreset::NaturalLow => "Natural Low",
             VoicePreset::IkemenSoft => "Ikemen Soft",
             VoicePreset::IkemenDeep => "Ikemen Deep",
@@ -65,6 +81,10 @@ impl VoicePreset {
     /// プリセットの短い説明。
     pub fn description(&self) -> &'static str {
         match self {
+            VoicePreset::NeutralClean => "性別感を薄めた自然で明瞭な声",
+            VoicePreset::SoftFeminine => "落ち着いた女性寄りの柔らかい声",
+            VoicePreset::BrightFeminine => "明るい女性寄りの高めの声",
+            VoicePreset::YoungNeutral => "少年・中性寄りの軽い声",
             VoicePreset::NaturalLow => "自然に少し低くする",
             VoicePreset::IkemenSoft => "爽やかで柔らかい低音",
             VoicePreset::IkemenDeep => "深めで落ち着いた声",
@@ -81,6 +101,10 @@ impl FromStr for VoicePreset {
     type Err = String;
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         match s.trim().to_lowercase().replace([' ', '-'], "_").as_str() {
+            "neutral_clean" => Ok(VoicePreset::NeutralClean),
+            "soft_feminine" => Ok(VoicePreset::SoftFeminine),
+            "bright_feminine" => Ok(VoicePreset::BrightFeminine),
+            "young_neutral" => Ok(VoicePreset::YoungNeutral),
             "natural_low" => Ok(VoicePreset::NaturalLow),
             "ikemen_soft" => Ok(VoicePreset::IkemenSoft),
             "ikemen_deep" => Ok(VoicePreset::IkemenDeep),

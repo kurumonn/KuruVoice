@@ -3,12 +3,15 @@
 //! すべての処理は `AudioProcessor` トレイトを実装し、モノラルの `&mut [f32]`
 //! ブロックをその場で加工する。処理順序は設計書 4.3 に従い `DspChain` が管理する。
 
+pub mod auto_gain;
 pub mod biquad;
 pub mod chain;
 pub mod compressor;
 pub mod dc_block;
+pub mod deesser;
 pub mod denoise;
 pub mod eq;
+pub mod harmonic;
 pub mod limiter;
 pub mod meter;
 pub mod noise_gate;

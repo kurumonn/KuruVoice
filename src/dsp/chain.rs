@@ -1,13 +1,16 @@
 //! DSP チェーン。設計書 5.2.3 / 4.3。
 //!
-//! 処理順序（4.3）:
-//!   DC カット → ノイズゲート → ピッチシフト → フォルマント補正
-//!   → EQ → コンプレッサー(+メイクアップ) → リミッター
+//! 処理順序（4.3 拡張）:
+//!   DC カット → ノイズ低減 → ノイズゲート → オートゲイン(AGC)
+//!   → ピッチ/フォルマント → EQ → ハーモニック → De-esser
+//!   → コンプレッサー(+メイクアップ) → リミッター
 //!
+//! 「綺麗に入れる(補正) → 綺麗に変える(声質) → 綺麗に出す(整音)」。
 //! リミッターは必ず最後（NF-005 / 5.8.3）。
 
 use super::{
-    compressor::Compressor, dc_block::DcBlock, denoise::NoiseReducer, eq::Eq, limiter::Limiter,
+    auto_gain::AutoGain, compressor::Compressor, dc_block::DcBlock, deesser::DeEsser,
+    denoise::NoiseReducer, eq::Eq, harmonic::HarmonicEnhancer, limiter::Limiter,
     noise_gate::NoiseGate, pitch_formant::PitchFormant, AudioProcessor,
 };
 use crate::config::AppConfig;
@@ -24,8 +27,11 @@ impl DspChain {
             Box::new(DcBlock::new()),
             Box::new(NoiseReducer::new(&cfg.denoise)),
             Box::new(NoiseGate::new(&cfg.noise_gate)),
+            Box::new(AutoGain::new(&cfg.auto_gain)),
             Box::new(PitchFormant::new(&cfg.voice)),
             Box::new(Eq::new(&cfg.eq)),
+            Box::new(HarmonicEnhancer::new(&cfg.harmonic)),
+            Box::new(DeEsser::new(&cfg.deesser)),
             Box::new(Compressor::new(&cfg.compressor)),
             Box::new(Limiter::new(&cfg.limiter)),
         ];
