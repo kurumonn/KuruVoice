@@ -24,6 +24,7 @@
 | 🎚 **ダッシュボード GUI** | プリセット選択・スライダー調整・入出力メーター・ワンクリック ON/OFF |
 | 🔉 **7 段 DSP チェーン** | DC カット → ノイズゲート → ピッチ → フォルマント → EQ → コンプ → **リミッター** |
 | 🎛 **6 プリセット** | Natural Low / Ikemen Soft / Ikemen Deep / Narrator / Clear Streaming / Radio Voice |
+| 🎨 **声の印象グラフ** | 「明瞭さ・かわいさ・かっこよさ・怖さ」をレーダーチャートでドラッグ調整（専門用語不要） |
 | ⚡ **低遅延・軽量** | GPU 不要。1 コアの数 % で動作（[実測](#-性能と効果の実測)） |
 | 📝 **TOML 設定** | GUI のツマミと 1:1 対応。保存・共有が簡単 |
 | 🖥 **CLI も完備** | `--list-devices` / `--preset` / `--record-test` など |
@@ -183,10 +184,14 @@ DSP 自体の追加遅延はごくわずか。GPU 不要。
 
 KuruVoice の加工音を他アプリへ送るには **仮想オーディオデバイス**を経由します。
 
+> 🎧 KuruVoice は起動時に **VB-CABLE / VoiceMeeter / BlackHole を自動検出**し、左ペインの
+> 「仮想マイク」からワンクリックで出力先に設定できます（受け側で選ぶマイク名も表示）。
+> 将来的には専用の仮想マイクを内蔵予定です（[設計](docs/virtual_audio_design.md)）。
+
 1. 仮想デバイスを導入
    - Windows: [VB-CABLE](https://vb-audio.com/Cable/) または VoiceMeeter
    - macOS: [BlackHole](https://existential.audio/blackhole/)
-   - Linux: PipeWire / JACK の仮想シンク
+   - **Linux: 左ペインの「🎙 KuruVoice 仮想マイクを作成」で外部ソフト無しに `KuruVoice_Mic` を生成可能**（PipeWire/PulseAudio）
 2. KuruVoice の **入力 = 実マイク** / **出力 = 仮想デバイス** に設定して「▶ 開始」
 3. 受け側アプリのマイク入力を **仮想デバイスの出力**に設定
    - OBS: 「音声入力キャプチャ」→ `CABLE Output`

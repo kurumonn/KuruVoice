@@ -12,3 +12,4 @@ pub mod dsp;
 pub mod error;
 pub mod gui;
 pub mod preset;
+pub mod voice_character;

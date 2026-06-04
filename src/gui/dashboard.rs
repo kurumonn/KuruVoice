@@ -5,10 +5,12 @@
 //!
 //! 「イケメン」イメージに合わせたダーク + シアン基調のテーマ。
 
-use crate::audio::{device, Engine};
+use crate::audio::virtual_cable::{self, VirtualCable};
+use crate::audio::{device, Engine, VirtualMic};
 use crate::config::AppConfig;
 use crate::dsp::meter::Meters;
 use crate::preset::{PresetManager, VoicePreset};
+use crate::voice_character::VoiceCharacter;
 use eframe::egui;
 use std::ops::RangeInclusive;
 use std::sync::Arc;
@@ -41,6 +43,9 @@ struct Dashboard {
     output_devices: Vec<String>,
     selected_input: String,
     selected_output: String,
+    cables: Vec<VirtualCable>,
+    virtual_mic: Option<VirtualMic>,
+    character: VoiceCharacter,
     engine: Option<Engine>,
     meters: Arc<Meters>,
     status: String,
@@ -53,12 +58,16 @@ impl Dashboard {
         let output_devices = device::output_device_names();
         let selected_input = pick_device(&config.audio.input_device, &input_devices);
         let selected_output = pick_device(&config.audio.output_device, &output_devices);
+        let cables = virtual_cable::detect_from(&output_devices);
         Self {
             config,
             input_devices,
             output_devices,
             selected_input,
             selected_output,
+            cables,
+            virtual_mic: None,
+            character: VoiceCharacter::default(),
             engine: None,
             meters: Arc::new(Meters::default()),
             status: "停止中".to_string(),
@@ -108,6 +117,7 @@ impl Dashboard {
         self.output_devices = device::output_device_names();
         self.selected_input = pick_device(&self.selected_input, &self.input_devices);
         self.selected_output = pick_device(&self.selected_output, &self.output_devices);
+        self.cables = virtual_cable::detect_from(&self.output_devices);
     }
 
     fn apply_preset(&mut self, preset: VoicePreset) {
@@ -133,6 +143,7 @@ impl eframe::App for Dashboard {
             self.preset_section(ui);
             ui.add_space(8.0);
             egui::ScrollArea::vertical().show(ui, |ui| {
+                self.character_section(ui, &mut dirty);
                 self.voice_section(ui, &mut dirty);
                 self.noise_gate_section(ui, &mut dirty);
                 self.eq_section(ui, &mut dirty);
@@ -150,6 +161,7 @@ impl eframe::App for Dashboard {
 
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
         self.stop_engine();
+        self.virtual_mic = None; // Drop で仮想マイクを破棄
     }
 }
 
@@ -273,14 +285,87 @@ impl Dashboard {
                 }
 
                 ui.add_space(14.0);
-                ui.label(egui::RichText::new("配信連携メモ").color(ACCENT).strong());
+                ui.label(egui::RichText::new("🎧 仮想マイク (配信連携)").color(ACCENT).strong());
                 ui.separator();
-                ui.label(
-                    egui::RichText::new(
-                        "出力に VB-CABLE / VoiceMeeter を選び、OBS や Discord の\nマイク入力をその仮想デバイスにすると配信に乗ります。",
-                    )
-                    .small(),
-                );
+                if self.cables.is_empty() {
+                    ui.label(
+                        egui::RichText::new(
+                            "仮想ケーブル未検出。VB-CABLE / VoiceMeeter を導入すると、\nKuruVoice の声を OBS・Discord・VRChat のマイクとして使えます。",
+                        )
+                        .small(),
+                    );
+                    ui.label(
+                        egui::RichText::new("VB-CABLE : vb-audio.com/Cable/")
+                            .small()
+                            .monospace(),
+                    );
+                } else {
+                    for cable in self.cables.clone() {
+                        let active = self.selected_output == cable.output_device;
+                        let label = if active {
+                            format!("✅ {} に出力中", cable.kind)
+                        } else {
+                            format!("▶ {} へ出力", cable.kind)
+                        };
+                        let mut btn = egui::Button::new(label);
+                        if active {
+                            btn = btn.fill(ACCENT_DARK);
+                        }
+                        if ui
+                            .add_enabled(!running, btn)
+                            .on_hover_text(cable.output_device.clone())
+                            .clicked()
+                        {
+                            self.selected_output = cable.output_device.clone();
+                        }
+                        ui.label(
+                            egui::RichText::new("受け側アプリのマイクで↓を選択:")
+                                .small()
+                                .color(egui::Color32::from_gray(170)),
+                        );
+                        ui.label(egui::RichText::new(&cable.mic_hint).monospace());
+                        ui.add_space(6.0);
+                    }
+                }
+
+                // Linux: ネイティブ仮想マイク（外部ソフト不要）。Windows では非表示。
+                if cfg!(target_os = "linux") {
+                    ui.add_space(8.0);
+                    let exists = self.virtual_mic.is_some();
+                    let label = if exists {
+                        "🗑 KuruVoice 仮想マイクを削除"
+                    } else {
+                        "🎙 KuruVoice 仮想マイクを作成"
+                    };
+                    if ui.add_enabled(!running, egui::Button::new(label)).clicked() {
+                        if exists {
+                            self.virtual_mic = None;
+                            self.status = "仮想マイクを削除しました".to_string();
+                            self.refresh_devices();
+                        } else {
+                            match VirtualMic::create() {
+                                Ok(vm) => {
+                                    self.selected_output = vm.sink_name().to_string();
+                                    self.status =
+                                        format!("仮想マイク作成: {} へ出力", vm.sink_name());
+                                    self.virtual_mic = Some(vm);
+                                    self.refresh_devices();
+                                }
+                                Err(e) => self.status = format!("作成失敗: {e}"),
+                            }
+                        }
+                    }
+                    if exists {
+                        ui.label(
+                            egui::RichText::new("受け側アプリのマイクで↓を選択:")
+                                .small()
+                                .color(egui::Color32::from_gray(170)),
+                        );
+                        ui.label(
+                            egui::RichText::new(crate::audio::virtual_mic::MIC_NAME).monospace(),
+                        );
+                    }
+                }
             });
     }
 
@@ -306,6 +391,42 @@ impl Dashboard {
                 if resp.clicked() {
                     self.apply_preset(preset);
                 }
+            }
+        });
+    }
+
+    fn character_section(&mut self, ui: &mut egui::Ui, dirty: &mut bool) {
+        egui::CollapsingHeader::new(
+            egui::RichText::new("🎨 声の印象（グラフでかんたん調整）").strong(),
+        )
+        .default_open(true)
+        .show(ui, |ui| {
+            let mut changed = false;
+            ui.horizontal(|ui| {
+                changed |= draw_radar(ui, &mut self.character);
+                ui.add_space(12.0);
+                ui.vertical(|ui| {
+                    ui.label(
+                        egui::RichText::new("グラフをドラッグ、または↓のスライダーで調整")
+                            .small()
+                            .color(egui::Color32::from_gray(170)),
+                    );
+                    changed |= char_slider(ui, "明瞭さ", &mut self.character.clarity);
+                    changed |= char_slider(ui, "かわいさ", &mut self.character.cuteness);
+                    changed |= char_slider(ui, "かっこよさ", &mut self.character.coolness);
+                    changed |= char_slider(ui, "怖さ", &mut self.character.fear);
+                    ui.label(
+                        egui::RichText::new(
+                            "※ プリセット/下の詳細スライダーとは独立。動かすと声づくり・EQ に反映されます。",
+                        )
+                        .small()
+                        .color(egui::Color32::from_gray(140)),
+                    );
+                });
+            });
+            if changed {
+                self.character.apply_to_config(&mut self.config);
+                *dirty = true;
             }
         });
     }
@@ -536,6 +657,98 @@ fn section<R>(ui: &mut egui::Ui, title: &str, add: impl FnOnce(&mut egui::Ui) ->
         .show(ui, |ui| {
             add(ui);
         });
+}
+
+/// 「声の印象」軸のスライダー（0..1 を % 表示）。変更があれば true。
+fn char_slider(ui: &mut egui::Ui, label: &str, value: &mut f32) -> bool {
+    ui.horizontal(|ui| {
+        ui.add_sized([84.0, 18.0], egui::Label::new(label));
+        let mut pct = *value * 100.0;
+        let resp = ui.add(egui::Slider::new(&mut pct, 0.0..=100.0).suffix("%"));
+        if resp.changed() {
+            *value = pct / 100.0;
+        }
+        resp.changed()
+    })
+    .inner
+}
+
+/// 「声の印象」レーダーチャート。ドラッグで最寄り軸の値を変更。変更があれば true。
+fn draw_radar(ui: &mut egui::Ui, ch: &mut VoiceCharacter) -> bool {
+    use std::f32::consts::{PI, TAU};
+    let size = 200.0;
+    let (resp, painter) =
+        ui.allocate_painter(egui::vec2(size, size), egui::Sense::click_and_drag());
+    let center = resp.rect.center();
+    let radius = size * 0.36;
+    let n = 4usize;
+    let dir = |i: usize| -> egui::Vec2 {
+        let a = -PI / 2.0 + i as f32 * TAU / n as f32;
+        egui::vec2(a.cos(), a.sin())
+    };
+    let grid = egui::Color32::from_gray(80);
+    let txt = egui::Color32::from_gray(205);
+
+    // 同心リング
+    for r in [0.25_f32, 0.5, 0.75, 1.0] {
+        let pts: Vec<egui::Pos2> = (0..=n).map(|i| center + dir(i % n) * radius * r).collect();
+        painter.add(egui::Shape::line(pts, egui::Stroke::new(1.0, grid)));
+    }
+    // 軸線 + ラベル
+    for i in 0..n {
+        painter.line_segment(
+            [center, center + dir(i) * radius],
+            egui::Stroke::new(1.0, grid),
+        );
+        painter.text(
+            center + dir(i) * (radius + 18.0),
+            egui::Align2::CENTER_CENTER,
+            VoiceCharacter::AXES[i],
+            egui::FontId::proportional(13.0),
+            txt,
+        );
+    }
+    // 現在値ポリゴン
+    let vals = ch.values();
+    let vpts: Vec<egui::Pos2> = (0..n)
+        .map(|i| center + dir(i) * radius * vals[i].max(0.02))
+        .collect();
+    painter.add(egui::Shape::convex_polygon(
+        vpts.clone(),
+        egui::Color32::from_rgba_unmultiplied(86, 204, 242, 60),
+        egui::Stroke::new(2.0, ACCENT),
+    ));
+    for p in &vpts {
+        painter.circle_filled(*p, 4.0, ACCENT);
+    }
+
+    // ドラッグ操作: 最寄り軸の値を投影で更新
+    let mut changed = false;
+    if resp.dragged() || resp.clicked() {
+        if let Some(ptr) = resp.interact_pointer_pos() {
+            let rel = ptr - center;
+            if rel.length() > 2.0 {
+                let ang = rel.y.atan2(rel.x);
+                let mut best = 0usize;
+                let mut best_d = f32::MAX;
+                for i in 0..n {
+                    let axis_a = -PI / 2.0 + i as f32 * TAU / n as f32;
+                    let mut d = (ang - axis_a).abs() % TAU;
+                    if d > PI {
+                        d = TAU - d;
+                    }
+                    if d < best_d {
+                        best_d = d;
+                        best = i;
+                    }
+                }
+                let proj = rel.dot(dir(best)) / radius;
+                ch.set(best, proj.clamp(0.0, 1.0));
+                changed = true;
+            }
+        }
+    }
+    changed
 }
 
 fn slider(

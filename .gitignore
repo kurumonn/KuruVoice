@@ -2,6 +2,7 @@
 **/*.rs.bk
 Cargo.lock
 build_log.txt
+gui_*.log
 kuruvoice_raw.wav
 kuruvoice_processed.wav
 kuruvoice_config.toml
