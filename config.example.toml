@@ -25,6 +25,12 @@ formant_shift = -0.8
 # 加工音と原音のミックス（1.0 = 完全に加工音）。
 mix = 1.0
 
+[denoise]
+# 背景ノイズ低減（STFTスペクトル減算）。ノイズゲートとは別物。
+enabled = false
+# 低減強度 0.0〜1.0（大きいほど強く除去。かけすぎると声が不自然に）。
+amount = 0.5
+
 [noise_gate]
 enabled = true
 threshold_db = -45.0

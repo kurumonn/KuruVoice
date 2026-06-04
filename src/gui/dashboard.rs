@@ -145,6 +145,7 @@ impl eframe::App for Dashboard {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 self.character_section(ui, &mut dirty);
                 self.voice_section(ui, &mut dirty);
+                self.denoise_section(ui, &mut dirty);
                 self.noise_gate_section(ui, &mut dirty);
                 self.eq_section(ui, &mut dirty);
                 self.compressor_section(ui, &mut dirty);
@@ -438,15 +439,15 @@ impl Dashboard {
                 dirty,
                 "ピッチ (半音)",
                 &mut self.config.voice.pitch_semitones,
-                -12.0..=12.0,
+                -24.0..=24.0,
                 " st",
             );
             slider(
                 ui,
                 dirty,
-                "フォルマント",
+                "フォルマント (声の太さ)",
                 &mut self.config.voice.formant_shift,
-                -3.0..=3.0,
+                -12.0..=12.0,
                 "",
             );
             slider(
@@ -458,6 +459,35 @@ impl Dashboard {
                 "",
             );
         });
+    }
+
+    fn denoise_section(&mut self, ui: &mut egui::Ui, dirty: &mut bool) {
+        section(
+            ui,
+            "ノイズキャンセル (背景ノイズ低減)",
+            |ui| {
+                *dirty |= ui
+                    .checkbox(&mut self.config.denoise.enabled, "有効")
+                    .changed();
+                ui.add_enabled_ui(self.config.denoise.enabled, |ui| {
+                    slider(
+                        ui,
+                        dirty,
+                        "強度",
+                        &mut self.config.denoise.amount,
+                        0.0..=1.0,
+                        "",
+                    );
+                    ui.label(
+                        egui::RichText::new(
+                            "ファン/ホワイトノイズ等を低減。強すぎると声が不自然に。",
+                        )
+                        .small()
+                        .color(egui::Color32::from_gray(150)),
+                    );
+                });
+            },
+        );
     }
 
     fn noise_gate_section(&mut self, ui: &mut egui::Ui, dirty: &mut bool) {

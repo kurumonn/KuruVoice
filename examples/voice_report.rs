@@ -159,6 +159,8 @@ fn main() {
         ("narrator", VoicePreset::Narrator),
         ("clear_streaming", VoicePreset::ClearStreaming),
         ("radio_voice", VoicePreset::RadioVoice),
+        ("bright_high", VoicePreset::BrightHigh),
+        ("deep_cool", VoicePreset::DeepCool),
     ];
 
     for (name, p) in presets {

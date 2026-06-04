@@ -62,9 +62,10 @@ impl VoiceCharacter {
         let f = self.fear;
 
         // ピッチ: かわいい=高く / かっこいい=やや低く / 怖い=大きく低く
-        cfg.voice.pitch_semitones = (q * 5.0 - k * 2.0 - f * 7.0).clamp(-12.0, 12.0);
+        // 高品質ピッチ/フォルマントになったので可動域を広めに取る。
+        cfg.voice.pitch_semitones = (q * 9.0 - k * 4.0 - f * 12.0).clamp(-24.0, 24.0);
         // フォルマント: かわいい=上げ(細く) / 怖い=下げ(太く) / かっこいい=やや下げ
-        cfg.voice.formant_shift = (q * 1.5 - f * 1.5 - k * 0.4).clamp(-3.0, 3.0);
+        cfg.voice.formant_shift = (q * 4.0 - f * 4.0 - k * 1.0).clamp(-12.0, 12.0);
 
         cfg.eq.enabled = true;
         // 明瞭感: 明瞭さ・かっこよさで増、怖さで減

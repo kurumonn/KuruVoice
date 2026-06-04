@@ -16,6 +16,7 @@ pub struct AppConfig {
     pub app: AppSection,
     pub audio: AudioSection,
     pub voice: VoiceSection,
+    pub denoise: DenoiseSection,
     pub noise_gate: NoiseGateSection,
     pub eq: EqSection,
     pub compressor: CompressorSection,
@@ -71,6 +72,24 @@ impl Default for VoiceSection {
             pitch_semitones: -3.0,
             formant_shift: -0.8,
             mix: 1.0,
+        }
+    }
+}
+
+/// ノイズキャンセル（STFT スペクトル減算）。ノイズゲートとは別物で、
+/// 発話中も含めて定常的な背景ノイズ（ファン・ホワイトノイズ等）を低減する。
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct DenoiseSection {
+    pub enabled: bool,
+    /// 低減強度 0.0〜1.0（大きいほど強く除去。かけすぎると不自然）。
+    pub amount: f32,
+}
+impl Default for DenoiseSection {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            amount: 0.5,
         }
     }
 }

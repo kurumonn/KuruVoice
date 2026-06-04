@@ -77,6 +77,24 @@ impl PresetManager {
                 cfg.noise_gate = gate(true, -45.0);
                 cfg.limiter = limiter(-1.0, 60.0);
             }
+            VoicePreset::BrightHigh => {
+                // 高音キャラ方向: 高く・細く・明るく（高品質ピッチ/フォルマントで自然に）
+                cfg.voice.pitch_semitones = 6.0;
+                cfg.voice.formant_shift = 2.0;
+                cfg.compressor = comp(-18.0, 3.0, 8.0, 120.0, 3.0);
+                cfg.eq = eq(120.0, -1.0, -2.0, 3.5, -3.0);
+                cfg.noise_gate = gate(true, -45.0);
+                cfg.limiter = limiter(-1.0, 50.0);
+            }
+            VoicePreset::DeepCool => {
+                // 低音キャラ方向: 低く・太く・渋く
+                cfg.voice.pitch_semitones = -6.0;
+                cfg.voice.formant_shift = -2.0;
+                cfg.compressor = comp(-16.0, 4.0, 6.0, 110.0, 4.0); // strong
+                cfg.eq = eq(70.0, 3.0, -1.5, 1.0, -2.0);
+                cfg.noise_gate = gate(true, -45.0);
+                cfg.limiter = limiter(-1.0, 60.0);
+            }
         }
     }
 }

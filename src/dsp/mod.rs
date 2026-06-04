@@ -7,12 +7,12 @@ pub mod biquad;
 pub mod chain;
 pub mod compressor;
 pub mod dc_block;
+pub mod denoise;
 pub mod eq;
-pub mod formant;
 pub mod limiter;
 pub mod meter;
 pub mod noise_gate;
-pub mod pitch_shift;
+pub mod pitch_formant;
 
 pub use chain::DspChain;
 

@@ -15,11 +15,13 @@ pub enum VoicePreset {
     Narrator,
     ClearStreaming,
     RadioVoice,
+    BrightHigh,
+    DeepCool,
 }
 
 impl VoicePreset {
     /// 全プリセットを定義順で返す（GUI のボタン生成などに使う）。
-    pub fn all() -> [VoicePreset; 6] {
+    pub fn all() -> [VoicePreset; 8] {
         [
             VoicePreset::NaturalLow,
             VoicePreset::IkemenSoft,
@@ -27,6 +29,8 @@ impl VoicePreset {
             VoicePreset::Narrator,
             VoicePreset::ClearStreaming,
             VoicePreset::RadioVoice,
+            VoicePreset::BrightHigh,
+            VoicePreset::DeepCool,
         ]
     }
 
@@ -39,6 +43,8 @@ impl VoicePreset {
             VoicePreset::Narrator => "narrator",
             VoicePreset::ClearStreaming => "clear_streaming",
             VoicePreset::RadioVoice => "radio_voice",
+            VoicePreset::BrightHigh => "bright_high",
+            VoicePreset::DeepCool => "deep_cool",
         }
     }
 
@@ -51,6 +57,8 @@ impl VoicePreset {
             VoicePreset::Narrator => "Narrator",
             VoicePreset::ClearStreaming => "Clear Streaming",
             VoicePreset::RadioVoice => "Radio Voice",
+            VoicePreset::BrightHigh => "Bright High",
+            VoicePreset::DeepCool => "Deep Cool",
         }
     }
 
@@ -63,6 +71,8 @@ impl VoicePreset {
             VoicePreset::Narrator => "聞き取りやすいナレーション向け",
             VoicePreset::ClearStreaming => "配信向けに明瞭感重視",
             VoicePreset::RadioVoice => "ラジオ風の太い声",
+            VoicePreset::BrightHigh => "明るく軽い高めの声（高音キャラ方向）",
+            VoicePreset::DeepCool => "低く渋い太めの声（低音キャラ方向）",
         }
     }
 }
@@ -77,6 +87,8 @@ impl FromStr for VoicePreset {
             "narrator" => Ok(VoicePreset::Narrator),
             "clear_streaming" => Ok(VoicePreset::ClearStreaming),
             "radio_voice" => Ok(VoicePreset::RadioVoice),
+            "bright_high" => Ok(VoicePreset::BrightHigh),
+            "deep_cool" => Ok(VoicePreset::DeepCool),
             other => Err(format!("未知のプリセット: {other}")),
         }
     }

@@ -7,8 +7,8 @@
 //! リミッターは必ず最後（NF-005 / 5.8.3）。
 
 use super::{
-    compressor::Compressor, dc_block::DcBlock, eq::Eq, formant::Formant, limiter::Limiter,
-    noise_gate::NoiseGate, pitch_shift::PitchShift, AudioProcessor,
+    compressor::Compressor, dc_block::DcBlock, denoise::NoiseReducer, eq::Eq, limiter::Limiter,
+    noise_gate::NoiseGate, pitch_formant::PitchFormant, AudioProcessor,
 };
 use crate::config::AppConfig;
 
@@ -22,9 +22,9 @@ impl DspChain {
     pub fn from_config(cfg: &AppConfig, sample_rate: f32, block_size: usize) -> Self {
         let mut processors: Vec<Box<dyn AudioProcessor + Send>> = vec![
             Box::new(DcBlock::new()),
+            Box::new(NoiseReducer::new(&cfg.denoise)),
             Box::new(NoiseGate::new(&cfg.noise_gate)),
-            Box::new(PitchShift::new(&cfg.voice)),
-            Box::new(Formant::new(&cfg.voice)),
+            Box::new(PitchFormant::new(&cfg.voice)),
             Box::new(Eq::new(&cfg.eq)),
             Box::new(Compressor::new(&cfg.compressor)),
             Box::new(Limiter::new(&cfg.limiter)),
