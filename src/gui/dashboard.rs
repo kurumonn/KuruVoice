@@ -50,6 +50,12 @@ struct Dashboard {
     meters: Arc<Meters>,
     status: String,
     config_path: String,
+    /// T-006: 起動エラーダイアログ用。Some の場合はモーダル表示。
+    error_msg: Option<String>,
+    /// T-014: ユーザープリセット保存用の名前入力フィールド。
+    user_preset_name: String,
+    /// T-014: ユーザー定義プリセット一覧 (名前, ファイルパス)。
+    user_presets: Vec<(String, std::path::PathBuf)>,
 }
 
 impl Dashboard {
@@ -59,6 +65,7 @@ impl Dashboard {
         let selected_input = pick_device(&config.audio.input_device, &input_devices);
         let selected_output = pick_device(&config.audio.output_device, &output_devices);
         let cables = virtual_cable::detect_from(&output_devices);
+        let user_presets = load_user_presets();
         Self {
             config,
             input_devices,
@@ -72,6 +79,9 @@ impl Dashboard {
             meters: Arc::new(Meters::default()),
             status: "停止中".to_string(),
             config_path: "kuruvoice_config.toml".to_string(),
+            error_msg: None,
+            user_preset_name: String::new(),
+            user_presets,
         }
     }
 
@@ -94,7 +104,16 @@ impl Dashboard {
                 self.engine = Some(engine);
             }
             Err(e) => {
-                self.status = format!("起動失敗: {e}");
+                let msg = format!("{e}");
+                self.status = format!("起動失敗: {msg}");
+                // T-006: エラーをモーダルダイアログで表示
+                self.error_msg = Some(format!(
+                    "エンジンの起動に失敗しました。\n\n{msg}\n\n\
+                     ヒント:\n\
+                     • デバイスが接続されているか確認してください\n\
+                     • 仮想ケーブル(VB-CABLE等)が必要な場合は導入してください\n\
+                     • デバイスを再取得してから再度お試しください"
+                ));
             }
         }
     }
@@ -134,6 +153,21 @@ impl eframe::App for Dashboard {
 
         let mut dirty = false;
 
+        // T-006: エラーダイアログ（モーダル）
+        if let Some(ref msg) = self.error_msg.clone() {
+            egui::Window::new("⚠ エラー")
+                .collapsible(false)
+                .resizable(false)
+                .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
+                .show(ctx, |ui| {
+                    ui.label(egui::RichText::new(msg).color(egui::Color32::from_rgb(235, 130, 90)));
+                    ui.add_space(8.0);
+                    if ui.button("閉じる").clicked() {
+                        self.error_msg = None;
+                    }
+                });
+        }
+
         self.top_bar(ctx);
         self.left_panel(ctx, &mut dirty);
 
@@ -145,6 +179,7 @@ impl eframe::App for Dashboard {
             egui::ScrollArea::vertical().show(ui, |ui| {
                 self.character_section(ui, &mut dirty);
                 self.voice_section(ui, &mut dirty);
+                self.fluctuation_section(ui, &mut dirty);
                 self.denoise_section(ui, &mut dirty);
                 self.auto_gain_section(ui, &mut dirty);
                 self.noise_gate_section(ui, &mut dirty);
@@ -154,6 +189,8 @@ impl eframe::App for Dashboard {
                 self.limiter_section(ui, &mut dirty);
                 ui.add_space(8.0);
                 self.config_io_section(ui);
+                ui.add_space(4.0);
+                self.user_preset_section(ui);
             });
         });
 
@@ -273,12 +310,15 @@ impl Dashboard {
                 ui.separator();
                 for (i, name) in [
                     "① DC カット",
-                    "② ノイズゲート",
-                    "③ ピッチシフト",
-                    "④ フォルマント補正",
-                    "⑤ EQ",
-                    "⑥ コンプレッサー",
-                    "⑦ リミッター",
+                    "② ノイズ低減",
+                    "③ ノイズゲート",
+                    "④ オートゲイン",
+                    "⑤ ピッチ/フォルマント",
+                    "⑥ EQ",
+                    "⑦ ハーモニック",
+                    "⑧ De-esser",
+                    "⑨ コンプレッサー",
+                    "⑩ リミッター",
                 ]
                 .iter()
                 .enumerate()
@@ -460,6 +500,55 @@ impl Dashboard {
                 0.0..=1.0,
                 "",
             );
+        });
+    }
+
+    fn fluctuation_section(&mut self, ui: &mut egui::Ui, dirty: &mut bool) {
+        section(ui, "1/f ゆらぎ (自然さ・心地よさ)", |ui| {
+            *dirty |= ui
+                .checkbox(&mut self.config.fluctuation.enabled, "有効")
+                .changed();
+            ui.add_enabled_ui(self.config.fluctuation.enabled, |ui| {
+                slider(
+                    ui,
+                    dirty,
+                    "効き",
+                    &mut self.config.fluctuation.amount,
+                    0.0..=1.0,
+                    "",
+                );
+                slider(
+                    ui,
+                    dirty,
+                    "ピッチ揺れ",
+                    &mut self.config.fluctuation.pitch_cents,
+                    0.0..=50.0,
+                    " cent",
+                );
+                slider(
+                    ui,
+                    dirty,
+                    "音量揺れ",
+                    &mut self.config.fluctuation.amp_depth,
+                    0.0..=0.5,
+                    "",
+                );
+                slider(
+                    ui,
+                    dirty,
+                    "揺らぎ速度",
+                    &mut self.config.fluctuation.rate_hz,
+                    0.5..=12.0,
+                    " Hz",
+                );
+                ui.label(
+                    egui::RichText::new(
+                        "1/f(ピンク)ノイズで微小に揺らし、機械っぽさを消して自然に。",
+                    )
+                    .small()
+                    .color(egui::Color32::from_gray(150)),
+                );
+            });
         });
     }
 
@@ -730,6 +819,78 @@ impl Dashboard {
         });
     }
 
+    fn user_preset_section(&mut self, ui: &mut egui::Ui) {
+        section(ui, "ユーザープリセット (保存・読込)", |ui| {
+            ui.horizontal(|ui| {
+                ui.label("名前:");
+                ui.add(
+                    egui::TextEdit::singleline(&mut self.user_preset_name)
+                        .desired_width(200.0)
+                        .hint_text("プリセット名"),
+                );
+                if ui.button("💾 名前を付けて保存").clicked() {
+                    let name = self.user_preset_name.trim().to_string();
+                    if !name.is_empty() {
+                        let path = std::path::PathBuf::from(format!("presets/{}.toml", name));
+                        std::fs::create_dir_all("presets").ok();
+                        match self.config.save(&path) {
+                            Ok(_) => {
+                                self.status = format!("プリセット保存: {name}");
+                                self.user_preset_name.clear();
+                                self.user_presets = load_user_presets();
+                            }
+                            Err(e) => self.status = format!("保存失敗: {e}"),
+                        }
+                    }
+                }
+                if ui.button("🔄 再読込").clicked() {
+                    self.user_presets = load_user_presets();
+                }
+            });
+            if !self.user_presets.is_empty() {
+                ui.add_space(4.0);
+                ui.label(
+                    egui::RichText::new("保存済みプリセット:")
+                        .small()
+                        .color(egui::Color32::from_gray(170)),
+                );
+                let to_load: Option<std::path::PathBuf> = {
+                    let mut load_path = None;
+                    ui.horizontal_wrapped(|ui| {
+                        for (name, path) in &self.user_presets {
+                            let selected = self.config_path == path.to_string_lossy();
+                            let mut btn = egui::Button::new(
+                                egui::RichText::new(name.as_str()).small(),
+                            );
+                            if selected {
+                                btn = btn.fill(ACCENT_DARK);
+                            }
+                            if ui.add(btn).clicked() {
+                                load_path = Some(path.clone());
+                            }
+                        }
+                    });
+                    load_path
+                };
+                if let Some(path) = to_load {
+                    match AppConfig::load(&path) {
+                        Ok(cfg) => {
+                            self.config = cfg;
+                            self.status = format!(
+                                "プリセット読込: {}",
+                                path.file_stem()
+                                    .and_then(|s| s.to_str())
+                                    .unwrap_or("?")
+                            );
+                            self.push_config();
+                        }
+                        Err(e) => self.status = format!("読込失敗: {e}"),
+                    }
+                }
+            }
+        });
+    }
+
     fn config_io_section(&mut self, ui: &mut egui::Ui) {
         section(ui, "設定ファイル (TOML)", |ui| {
             ui.horizontal(|ui| {
@@ -912,6 +1073,38 @@ fn pick_device(want: &str, list: &[String]) -> String {
             .cloned()
             .unwrap_or_else(|| "default".to_string())
     }
+}
+
+/// T-014: `presets/` フォルダ内の .toml ファイルをユーザープリセットとして読み込む。
+fn load_user_presets() -> Vec<(String, std::path::PathBuf)> {
+    let dir = std::path::Path::new("presets");
+    if !dir.exists() {
+        return vec![];
+    }
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return vec![];
+    };
+    let mut list: Vec<(String, std::path::PathBuf)> = entries
+        .filter_map(|e| e.ok())
+        .filter(|e| {
+            e.path()
+                .extension()
+                .and_then(|s| s.to_str())
+                .map(|s| s == "toml")
+                .unwrap_or(false)
+        })
+        .map(|e| {
+            let path = e.path();
+            let name = path
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("?")
+                .to_string();
+            (name, path)
+        })
+        .collect();
+    list.sort_by(|a, b| a.0.cmp(&b.0));
+    list
 }
 
 /// 長いデバイス名を短縮表示する。

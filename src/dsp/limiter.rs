@@ -12,6 +12,7 @@ pub struct Limiter {
     release_coeff: f32,
     release_ms: f32,
     gain: f32,
+    sample_rate: f32,
 }
 
 impl Limiter {
@@ -22,6 +23,7 @@ impl Limiter {
             release_coeff: 0.0,
             release_ms: cfg.release_ms,
             gain: 1.0,
+            sample_rate: 48000.0,
         }
     }
 }
@@ -32,6 +34,7 @@ impl AudioProcessor for Limiter {
     }
 
     fn prepare(&mut self, sample_rate: f32, _block_size: usize) {
+        self.sample_rate = sample_rate;
         self.release_coeff = time_to_coeff(self.release_ms.max(1.0), sample_rate);
     }
 
@@ -58,5 +61,14 @@ impl AudioProcessor for Limiter {
 
     fn reset(&mut self) {
         self.gain = 1.0;
+    }
+
+    fn update_params(&mut self, cfg: &crate::config::AppConfig) {
+        self.enabled = cfg.limiter.enabled;
+        self.ceiling = db_to_gain(cfg.limiter.ceiling_db);
+        self.release_ms = cfg.limiter.release_ms;
+        if self.sample_rate > 0.0 {
+            self.release_coeff = time_to_coeff(self.release_ms.max(1.0), self.sample_rate);
+        }
     }
 }

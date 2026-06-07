@@ -99,6 +99,13 @@ impl AudioProcessor for HarmonicEnhancer {
         self.high_hp.reset();
         self.bright_hp.reset();
     }
+
+    fn update_params(&mut self, cfg: &crate::config::AppConfig) {
+        self.enabled = cfg.harmonic.enabled;
+        self.amount = cfg.harmonic.amount.clamp(0.0, 1.0);
+        self.warmth = cfg.harmonic.warmth.clamp(0.0, 1.0);
+        self.brightness = cfg.harmonic.brightness.clamp(0.0, 1.0);
+    }
 }
 
 #[cfg(test)]

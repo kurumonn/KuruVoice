@@ -11,6 +11,7 @@ pub mod dc_block;
 pub mod deesser;
 pub mod denoise;
 pub mod eq;
+pub mod fluctuation;
 pub mod harmonic;
 pub mod limiter;
 pub mod meter;
@@ -29,6 +30,9 @@ pub trait AudioProcessor {
     fn process(&mut self, buffer: &mut [f32]);
     /// 内部状態（フィルタ履歴など）をクリアする。
     fn reset(&mut self);
+    /// パラメータを差分更新する（内部状態はリセットしない）。T-007。
+    /// デフォルト実装は何もしない。各モジュールが必要な項目だけ上書きする。
+    fn update_params(&mut self, _cfg: &crate::config::AppConfig) {}
 }
 
 // ---- 共通の数学ヘルパー ----

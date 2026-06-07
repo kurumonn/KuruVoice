@@ -16,6 +16,7 @@ pub struct AppConfig {
     pub app: AppSection,
     pub audio: AudioSection,
     pub voice: VoiceSection,
+    pub fluctuation: FluctuationSection,
     pub denoise: DenoiseSection,
     pub auto_gain: AutoGainSection,
     pub noise_gate: NoiseGateSection,
@@ -75,6 +76,34 @@ impl Default for VoiceSection {
             pitch_semitones: -3.0,
             formant_shift: -0.8,
             mix: 1.0,
+        }
+    }
+}
+
+/// 1/f ゆらぎモード。KV-DSP-5。
+/// ピンクノイズ(1/f)で駆動する微小なピッチ揺れ(マイクロ・ビブラート)と音量揺れ(トレモロ)を
+/// 加え、機械的・平坦な合成感を消して「人間らしい・心地よい」自然な声にする。
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct FluctuationSection {
+    pub enabled: bool,
+    /// 全体の効き 0.0〜1.0。
+    pub amount: f32,
+    /// ピッチ揺れの最大幅（セント）。
+    pub pitch_cents: f32,
+    /// 音量揺れの深さ 0.0〜1.0。
+    pub amp_depth: f32,
+    /// 揺らぎの基準レート(Hz)。小さいほどゆっくり。
+    pub rate_hz: f32,
+}
+impl Default for FluctuationSection {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            amount: 0.5,
+            pitch_cents: 12.0,
+            amp_depth: 0.1,
+            rate_hz: 5.0,
         }
     }
 }

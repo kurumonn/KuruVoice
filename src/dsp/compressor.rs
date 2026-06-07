@@ -16,6 +16,7 @@ pub struct Compressor {
     attack_coeff: f32,
     release_coeff: f32,
     env_db: f32, // dB ドメインのエンベロープ
+    sample_rate: f32,
 }
 
 impl Compressor {
@@ -30,6 +31,7 @@ impl Compressor {
             attack_coeff: 0.0,
             release_coeff: 0.0,
             env_db: -120.0,
+            sample_rate: 48000.0,
         }
     }
 }
@@ -40,6 +42,7 @@ impl AudioProcessor for Compressor {
     }
 
     fn prepare(&mut self, sample_rate: f32, _block_size: usize) {
+        self.sample_rate = sample_rate;
         self.attack_coeff = time_to_coeff(self.attack_ms.max(0.1), sample_rate);
         self.release_coeff = time_to_coeff(self.release_ms.max(1.0), sample_rate);
     }
@@ -72,5 +75,18 @@ impl AudioProcessor for Compressor {
 
     fn reset(&mut self) {
         self.env_db = -120.0;
+    }
+
+    fn update_params(&mut self, cfg: &crate::config::AppConfig) {
+        self.enabled = cfg.compressor.enabled;
+        self.threshold_db = cfg.compressor.threshold_db;
+        self.ratio = cfg.compressor.ratio.max(1.0);
+        self.makeup = db_to_gain(cfg.compressor.makeup_gain_db);
+        self.attack_ms = cfg.compressor.attack_ms;
+        self.release_ms = cfg.compressor.release_ms;
+        if self.sample_rate > 0.0 {
+            self.attack_coeff = time_to_coeff(self.attack_ms.max(0.1), self.sample_rate);
+            self.release_coeff = time_to_coeff(self.release_ms.max(1.0), self.sample_rate);
+        }
     }
 }

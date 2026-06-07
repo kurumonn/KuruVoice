@@ -4,6 +4,7 @@
 //! コアモジュールをライブラリとして公開する。GUI は OS ウィンドウに依存するため
 //! ライブラリには含めず、バイナリ側 (`src/gui`) に置く。
 
+pub mod ai;
 pub mod app;
 pub mod audio;
 pub mod cli;

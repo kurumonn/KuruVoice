@@ -2,7 +2,7 @@
 //!
 //! 処理順序（4.3 拡張）:
 //!   DC カット → ノイズ低減 → ノイズゲート → オートゲイン(AGC)
-//!   → ピッチ/フォルマント → EQ → ハーモニック → De-esser
+//!   → ピッチ/フォルマント → ゆらぎ → EQ → ハーモニック → De-esser
 //!   → コンプレッサー(+メイクアップ) → リミッター
 //!
 //! 「綺麗に入れる(補正) → 綺麗に変える(声質) → 綺麗に出す(整音)」。
@@ -10,14 +10,22 @@
 
 use super::{
     auto_gain::AutoGain, compressor::Compressor, dc_block::DcBlock, deesser::DeEsser,
-    denoise::NoiseReducer, eq::Eq, harmonic::HarmonicEnhancer, limiter::Limiter,
-    noise_gate::NoiseGate, pitch_formant::PitchFormant, AudioProcessor,
+    denoise::NoiseReducer, eq::Eq, fluctuation::Fluctuation, harmonic::HarmonicEnhancer,
+    limiter::Limiter, noise_gate::NoiseGate, pitch_formant::PitchFormant, AudioProcessor,
 };
 use crate::config::AppConfig;
 
+/// バイパスフェード 1 サンプルあたりの追従係数（約 20ms でフェード完了）。
+const BYPASS_ALPHA: f32 = 0.005;
+
 pub struct DspChain {
     processors: Vec<Box<dyn AudioProcessor + Send>>,
-    bypass: bool,
+    /// 0.0 = フル処理、1.0 = フルバイパス（目標値）。
+    bypass_target: f32,
+    /// 現在のフェード位置（クロスフェード中に 0↔1 を補間）。
+    bypass_fade: f32,
+    /// ドライ信号を一時保持するバッファ（クロスフェード用。事前確保でアロケーション回避）。
+    dry_buf: Vec<f32>,
 }
 
 impl DspChain {
@@ -29,6 +37,7 @@ impl DspChain {
             Box::new(NoiseGate::new(&cfg.noise_gate)),
             Box::new(AutoGain::new(&cfg.auto_gain)),
             Box::new(PitchFormant::new(&cfg.voice)),
+            Box::new(Fluctuation::new(&cfg.fluctuation)),
             Box::new(Eq::new(&cfg.eq)),
             Box::new(HarmonicEnhancer::new(&cfg.harmonic)),
             Box::new(DeEsser::new(&cfg.deesser)),
@@ -38,28 +47,61 @@ impl DspChain {
         for p in processors.iter_mut() {
             p.prepare(sample_rate, block_size);
         }
+        let bypass_val = if cfg.app.bypass { 1.0 } else { 0.0 };
         Self {
             processors,
-            bypass: cfg.app.bypass,
+            bypass_target: bypass_val,
+            bypass_fade: bypass_val,
+            dry_buf: vec![0.0; block_size],
         }
     }
 
-    /// バイパス状態を設定する。F-015。
+    /// パラメータを差分更新する（チェーンを再構築しない）。T-007。
+    /// GUI のスライダー操作時に呼び出し、プチノイズを防ぐ。
+    pub fn update_params(&mut self, cfg: &AppConfig) {
+        for p in self.processors.iter_mut() {
+            p.update_params(cfg);
+        }
+        self.bypass_target = if cfg.app.bypass { 1.0 } else { 0.0 };
+    }
+
+    /// バイパス状態を設定する。F-015。クロスフェード付き。
     pub fn set_bypass(&mut self, bypass: bool) {
-        self.bypass = bypass;
+        self.bypass_target = if bypass { 1.0 } else { 0.0 };
     }
 
     pub fn is_bypassed(&self) -> bool {
-        self.bypass
+        self.bypass_target > 0.5
     }
 
-    /// バッファを順に処理する。bypass 時は素通し（5.2.3）。
+    /// バッファを順に処理する。bypass 時はクロスフェードで素通しへ移行（5.2.3 / T-009）。
     pub fn process(&mut self, buffer: &mut [f32]) {
-        if self.bypass {
+        let at_bypass = self.bypass_fade > 0.999 && self.bypass_target > 0.999;
+        let at_wet = self.bypass_fade < 0.001 && self.bypass_target < 0.001;
+
+        if at_bypass {
             return;
         }
+
+        if at_wet {
+            for processor in self.processors.iter_mut() {
+                processor.process(buffer);
+            }
+            return;
+        }
+
+        // クロスフェード中: ドライコピーを保持してから処理し、ブレンド
+        let len = buffer.len().min(self.dry_buf.len());
+        self.dry_buf[..len].copy_from_slice(&buffer[..len]);
+
         for processor in self.processors.iter_mut() {
             processor.process(buffer);
+        }
+
+        for i in 0..len {
+            self.bypass_fade += (self.bypass_target - self.bypass_fade) * BYPASS_ALPHA;
+            let fade = self.bypass_fade.clamp(0.0, 1.0);
+            buffer[i] = buffer[i] * (1.0 - fade) + self.dry_buf[i] * fade;
         }
     }
 

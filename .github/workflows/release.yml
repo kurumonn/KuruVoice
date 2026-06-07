@@ -1,16 +1,49 @@
+# T-010: GitHub Actions — タグ push で Windows / macOS / Linux バイナリを自動リリース。
+# T-013: CI ジョブで golden_report の絶対閾値チェックを実行する。
+
 name: Release
 
 on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  # ------------------------------------------------------------------
+  # CI: fmt / clippy / test / golden_report 閾値チェック
+  # ------------------------------------------------------------------
+  ci:
+    name: CI check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Install ALSA (Linux)
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev pkg-config
+      - name: fmt
+        run: cargo fmt --all -- --check
+      - name: clippy
+        run: cargo clippy --all-targets -- -D warnings
+      - name: test
+        run: cargo test
+      - name: golden_report threshold check (T-013)
+        run: cargo run --release --example golden_report -- --generate-fixtures
+      - name: Upload eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: target/golden_report.json
+
   build:
     name: build ${{ matrix.target }}
+    needs: ci
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

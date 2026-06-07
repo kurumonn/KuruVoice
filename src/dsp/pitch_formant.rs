@@ -29,11 +29,18 @@ fn czero() -> Complex<f32> {
     Complex::new(0.0, 0.0)
 }
 
+/// T-008: STFT フレームごとのスムージング係数（フレーム = HOP ≈ 5ms @48kHz）。
+const PARAM_SMOOTH_ALPHA: f32 = 0.12;
+
 pub struct PitchFormant {
     active: bool,
     pitch_ratio: f32,
     formant_ratio: f32,
     mix: f32,
+    /// T-008 スムージング用ターゲット値。
+    pitch_ratio_target: f32,
+    formant_ratio_target: f32,
+    mix_target: f32,
     sample_rate: f32,
     freq_per_bin: f32,
     expct: f32,
@@ -77,11 +84,17 @@ impl PitchFormant {
             .collect();
         let latency = FFT_SIZE - HOP;
 
+        let pr = semitones_to_ratio(voice.pitch_semitones);
+        let fr = 2.0_f32.powf(voice.formant_shift / 6.0);
+        let mx = voice.mix.clamp(0.0, 1.0);
         Self {
             active: voice.pitch_semitones.abs() > 0.01 || voice.formant_shift.abs() > 0.01,
-            pitch_ratio: semitones_to_ratio(voice.pitch_semitones),
-            formant_ratio: 2.0_f32.powf(voice.formant_shift / 6.0),
-            mix: voice.mix.clamp(0.0, 1.0),
+            pitch_ratio: pr,
+            formant_ratio: fr,
+            mix: mx,
+            pitch_ratio_target: pr,
+            formant_ratio_target: fr,
+            mix_target: mx,
             sample_rate: 48000.0,
             freq_per_bin: 48000.0 / FFT_SIZE as f32,
             expct: 2.0 * PI * HOP as f32 / FFT_SIZE as f32,
@@ -111,11 +124,17 @@ impl PitchFormant {
 
     fn bypassed(&self) -> bool {
         !self.active
+            || self.mix <= 0.001
             || ((self.pitch_ratio - 1.0).abs() < 1e-4 && (self.formant_ratio - 1.0).abs() < 1e-4)
     }
 
     /// 1 フレーム（FFT_SIZE）分の解析・加工・合成と OLA。
     fn process_frame(&mut self) {
+        // T-008: パラメータをターゲットへ向けてスムージング（プチノイズ防止）
+        self.pitch_ratio += (self.pitch_ratio_target - self.pitch_ratio) * PARAM_SMOOTH_ALPHA;
+        self.formant_ratio += (self.formant_ratio_target - self.formant_ratio) * PARAM_SMOOTH_ALPHA;
+        self.mix += (self.mix_target - self.mix) * PARAM_SMOOTH_ALPHA;
+
         // 窓掛け → FFT
         for k in 0..FFT_SIZE {
             self.spec[k] = Complex::new(self.in_fifo[k] * self.window[k], 0.0);
@@ -311,6 +330,15 @@ impl AudioProcessor for PitchFormant {
         self.dry_pos = 0;
         self.rover = FFT_SIZE - HOP;
     }
+
+    fn update_params(&mut self, cfg: &crate::config::AppConfig) {
+        self.pitch_ratio_target = semitones_to_ratio(cfg.voice.pitch_semitones);
+        self.formant_ratio_target = 2.0_f32.powf(cfg.voice.formant_shift / 6.0);
+        self.mix_target = cfg.voice.mix.clamp(0.0, 1.0);
+        if cfg.voice.pitch_semitones.abs() > 0.01 || cfg.voice.formant_shift.abs() > 0.01 {
+            self.active = true;
+        }
+    }
 }
 
 #[cfg(test)]
@@ -391,6 +419,21 @@ mod tests {
     fn neutral_is_bypassed() {
         let pf = PitchFormant::new(&voice(0.0, 0.0));
         assert!(pf.bypassed());
+    }
+
+    #[test]
+    fn zero_mix_is_bypassed_without_latency() {
+        let mut v = voice(7.0, 1.0);
+        v.mix = 0.0;
+        let mut pf = PitchFormant::new(&v);
+        pf.prepare(48000.0, 256);
+        assert!(pf.bypassed());
+        let input: Vec<f32> = (0..512)
+            .map(|i| (2.0 * PI * 220.0 * i as f32 / 48000.0).sin() * 0.2)
+            .collect();
+        let mut buf = input.clone();
+        pf.process(&mut buf);
+        assert_eq!(buf, input);
     }
 
     #[test]

@@ -82,6 +82,13 @@ impl AudioProcessor for AutoGain {
         self.env = 0.0;
         self.gain = 1.0;
     }
+
+    fn update_params(&mut self, cfg: &crate::config::AppConfig) {
+        self.enabled = cfg.auto_gain.enabled;
+        self.target = db_to_gain(cfg.auto_gain.target_db);
+        self.max_gain = db_to_gain(cfg.auto_gain.max_gain_db.max(0.0));
+        self.gate = db_to_gain(cfg.auto_gain.gate_db);
+    }
 }
 
 #[cfg(test)]

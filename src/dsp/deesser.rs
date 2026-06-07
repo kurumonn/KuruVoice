@@ -109,4 +109,19 @@ impl AudioProcessor for DeEsser {
         self.env_db = -120.0;
         self.gain = 1.0;
     }
+
+    fn update_params(&mut self, cfg: &crate::config::AppConfig) {
+        self.enabled = cfg.deesser.enabled;
+        self.split_hz = cfg.deesser.frequency_hz;
+        self.threshold_db = cfg.deesser.threshold_db;
+        self.ratio = cfg.deesser.ratio.max(1.0);
+        self.max_reduction_db = cfg.deesser.max_reduction_db.max(0.0);
+        self.attack_ms = cfg.deesser.attack_ms;
+        self.release_ms = cfg.deesser.release_ms;
+        if self.sample_rate > 0.0 {
+            self.attack_coeff = time_to_coeff(self.attack_ms.max(0.1), self.sample_rate);
+            self.release_coeff = time_to_coeff(self.release_ms.max(1.0), self.sample_rate);
+            self.rebuild();
+        }
+    }
 }

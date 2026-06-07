@@ -78,4 +78,10 @@ impl AudioProcessor for Eq {
         self.presence.reset();
         self.de_esser.reset();
     }
+
+    fn update_params(&mut self, cfg: &crate::config::AppConfig) {
+        self.enabled = cfg.eq.enabled;
+        self.cfg = cfg.eq.clone();
+        self.rebuild();
+    }
 }

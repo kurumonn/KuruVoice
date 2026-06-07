@@ -88,4 +88,15 @@ impl AudioProcessor for NoiseGate {
         self.env = 0.0;
         self.gain = 1.0;
     }
+
+    fn update_params(&mut self, cfg: &crate::config::AppConfig) {
+        self.enabled = cfg.noise_gate.enabled;
+        self.threshold = db_to_gain(cfg.noise_gate.threshold_db);
+        self.attack_ms = cfg.noise_gate.attack_ms;
+        self.release_ms = cfg.noise_gate.release_ms;
+        if self.sample_rate > 0.0 {
+            self.attack_coeff = time_to_coeff(self.attack_ms.max(0.1), self.sample_rate);
+            self.release_coeff = time_to_coeff(self.release_ms.max(1.0), self.sample_rate);
+        }
+    }
 }

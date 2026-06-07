@@ -1,0 +1,1087 @@
+{
+  "schema": 1,
+  "sample_rate": 48000,
+  "block_size": 256,
+  "cases": [
+    {
+      "fixture": "female",
+      "preset": "neutral_clean",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0963,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.3091
+      },
+      "output": {
+        "peak": 0.615,
+        "rms_db": -17.9778,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.7781
+      },
+      "delta_rms_db": -4.8815,
+      "delta_noise_floor_db": 1.531
+    },
+    {
+      "fixture": "female",
+      "preset": "soft_feminine",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0963,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.3091
+      },
+      "output": {
+        "peak": 0.5649,
+        "rms_db": -16.8918,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5439
+      },
+      "delta_rms_db": -3.7955,
+      "delta_noise_floor_db": 0.7652
+    },
+    {
+      "fixture": "female",
+      "preset": "bright_feminine",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0963,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.3091
+      },
+      "output": {
+        "peak": 0.4104,
+        "rms_db": -18.4795,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.0551
+      },
+      "delta_rms_db": -5.3832,
+      "delta_noise_floor_db": 1.254
+    },
+    {
+      "fixture": "female",
+      "preset": "young_neutral",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0963,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.3091
+      },
+      "output": {
+        "peak": 0.5559,
+        "rms_db": -17.3699,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.1997
+      },
+      "delta_rms_db": -4.2736,
+      "delta_noise_floor_db": 1.1094
+    },
+    {
+      "fixture": "female",
+      "preset": "natural_low",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0963,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.3091
+      },
+      "output": {
+        "peak": 0.8108,
+        "rms_db": -16.3564,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.827
+      },
+      "delta_rms_db": -3.2601,
+      "delta_noise_floor_db": 1.4821
+    },
+    {
+      "fixture": "female",
+      "preset": "ikemen_soft",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0963,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.3091
+      },
+      "output": {
+        "peak": 0.8903,
+        "rms_db": -15.4122,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.2233
+      },
+      "delta_rms_db": -2.3159,
+      "delta_noise_floor_db": 1.0858
+    },
+    {
+      "fixture": "female",
+      "preset": "ikemen_deep",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0963,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.3091
+      },
+      "output": {
+        "peak": 0.8266,
+        "rms_db": -15.4199,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.3342
+      },
+      "delta_rms_db": -2.3236,
+      "delta_noise_floor_db": 0.9749
+    },
+    {
+      "fixture": "female",
+      "preset": "narrator",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0963,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.3091
+      },
+      "output": {
+        "peak": 0.8414,
+        "rms_db": -13.7045,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.9163
+      },
+      "delta_rms_db": -0.6082,
+      "delta_noise_floor_db": 1.3928
+    },
+    {
+      "fixture": "female",
+      "preset": "clear_streaming",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0963,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.3091
+      },
+      "output": {
+        "peak": 0.8913,
+        "rms_db": -15.3341,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.0891
+      },
+      "delta_rms_db": -2.2378,
+      "delta_noise_floor_db": 1.22
+    },
+    {
+      "fixture": "female",
+      "preset": "radio_voice",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0963,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.3091
+      },
+      "output": {
+        "peak": 0.8913,
+        "rms_db": -12.4274,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.2456
+      },
+      "delta_rms_db": 0.6689,
+      "delta_noise_floor_db": 1.0635
+    },
+    {
+      "fixture": "female",
+      "preset": "bright_high",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0963,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.3091
+      },
+      "output": {
+        "peak": 0.8414,
+        "rms_db": -14.8682,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.9077
+      },
+      "delta_rms_db": -1.7719,
+      "delta_noise_floor_db": 1.4014
+    },
+    {
+      "fixture": "female",
+      "preset": "deep_cool",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0963,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.3091
+      },
+      "output": {
+        "peak": 0.8681,
+        "rms_db": -13.5897,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.4068
+      },
+      "delta_rms_db": -0.4934,
+      "delta_noise_floor_db": 0.9023
+    },
+    {
+      "fixture": "keyboard",
+      "preset": "neutral_clean",
+      "input": {
+        "peak": 0.2549,
+        "rms_db": -39.6949,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.7488
+      },
+      "output": {
+        "peak": 0.0884,
+        "rms_db": -51.0995,
+        "clip_rate": 0.0,
+        "noise_floor_db": -55.8475
+      },
+      "delta_rms_db": -11.4046,
+      "delta_noise_floor_db": -11.0987
+    },
+    {
+      "fixture": "keyboard",
+      "preset": "soft_feminine",
+      "input": {
+        "peak": 0.2549,
+        "rms_db": -39.6949,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.7488
+      },
+      "output": {
+        "peak": 0.1207,
+        "rms_db": -50.3186,
+        "clip_rate": 0.0,
+        "noise_floor_db": -55.8079
+      },
+      "delta_rms_db": -10.6237,
+      "delta_noise_floor_db": -11.0591
+    },
+    {
+      "fixture": "keyboard",
+      "preset": "bright_feminine",
+      "input": {
+        "peak": 0.2549,
+        "rms_db": -39.6949,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.7488
+      },
+      "output": {
+        "peak": 0.1254,
+        "rms_db": -50.7468,
+        "clip_rate": 0.0,
+        "noise_floor_db": -56.1274
+      },
+      "delta_rms_db": -11.0519,
+      "delta_noise_floor_db": -11.3786
+    },
+    {
+      "fixture": "keyboard",
+      "preset": "young_neutral",
+      "input": {
+        "peak": 0.2549,
+        "rms_db": -39.6949,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.7488
+      },
+      "output": {
+        "peak": 0.1102,
+        "rms_db": -51.3067,
+        "clip_rate": 0.0,
+        "noise_floor_db": -56.0653
+      },
+      "delta_rms_db": -11.6118,
+      "delta_noise_floor_db": -11.3165
+    },
+    {
+      "fixture": "keyboard",
+      "preset": "natural_low",
+      "input": {
+        "peak": 0.2549,
+        "rms_db": -39.6949,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.7488
+      },
+      "output": {
+        "peak": 0.0706,
+        "rms_db": -46.2334,
+        "clip_rate": 0.0,
+        "noise_floor_db": -49.4866
+      },
+      "delta_rms_db": -6.5385,
+      "delta_noise_floor_db": -4.7378
+    },
+    {
+      "fixture": "keyboard",
+      "preset": "ikemen_soft",
+      "input": {
+        "peak": 0.2549,
+        "rms_db": -39.6949,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.7488
+      },
+      "output": {
+        "peak": 0.0924,
+        "rms_db": -45.5038,
+        "clip_rate": 0.0,
+        "noise_floor_db": -48.8828
+      },
+      "delta_rms_db": -5.8089,
+      "delta_noise_floor_db": -4.134
+    },
+    {
+      "fixture": "keyboard",
+      "preset": "ikemen_deep",
+      "input": {
+        "peak": 0.2549,
+        "rms_db": -39.6949,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.7488
+      },
+      "output": {
+        "peak": 0.0798,
+        "rms_db": -45.2973,
+        "clip_rate": 0.0,
+        "noise_floor_db": -48.9221
+      },
+      "delta_rms_db": -5.6024,
+      "delta_noise_floor_db": -4.1733
+    },
+    {
+      "fixture": "keyboard",
+      "preset": "narrator",
+      "input": {
+        "peak": 0.2549,
+        "rms_db": -39.6949,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.7488
+      },
+      "output": {
+        "peak": 0.0823,
+        "rms_db": -44.2664,
+        "clip_rate": 0.0,
+        "noise_floor_db": -48.0299
+      },
+      "delta_rms_db": -4.5715,
+      "delta_noise_floor_db": -3.2811
+    },
+    {
+      "fixture": "keyboard",
+      "preset": "clear_streaming",
+      "input": {
+        "peak": 0.2549,
+        "rms_db": -39.6949,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.7488
+      },
+      "output": {
+        "peak": 0.0179,
+        "rms_db": -56.5605,
+        "clip_rate": 0.0,
+        "noise_floor_db": -56.6916
+      },
+      "delta_rms_db": -16.8656,
+      "delta_noise_floor_db": -11.9428
+    },
+    {
+      "fixture": "keyboard",
+      "preset": "radio_voice",
+      "input": {
+        "peak": 0.2549,
+        "rms_db": -39.6949,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.7488
+      },
+      "output": {
+        "peak": 0.1253,
+        "rms_db": -43.679,
+        "clip_rate": 0.0,
+        "noise_floor_db": -48.1409
+      },
+      "delta_rms_db": -3.9841,
+      "delta_noise_floor_db": -3.3921
+    },
+    {
+      "fixture": "keyboard",
+      "preset": "bright_high",
+      "input": {
+        "peak": 0.2549,
+        "rms_db": -39.6949,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.7488
+      },
+      "output": {
+        "peak": 0.1287,
+        "rms_db": -42.8253,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.832
+      },
+      "delta_rms_db": -3.1304,
+      "delta_noise_floor_db": -3.0832
+    },
+    {
+      "fixture": "keyboard",
+      "preset": "deep_cool",
+      "input": {
+        "peak": 0.2549,
+        "rms_db": -39.6949,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.7488
+      },
+      "output": {
+        "peak": 0.0736,
+        "rms_db": -44.7109,
+        "clip_rate": 0.0,
+        "noise_floor_db": -48.3381
+      },
+      "delta_rms_db": -5.016,
+      "delta_noise_floor_db": -3.5893
+    },
+    {
+      "fixture": "male_low",
+      "preset": "neutral_clean",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0965,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.0512
+      },
+      "output": {
+        "peak": 0.4547,
+        "rms_db": -18.2178,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.0184
+      },
+      "delta_rms_db": -5.1213,
+      "delta_noise_floor_db": 1.0328
+    },
+    {
+      "fixture": "male_low",
+      "preset": "soft_feminine",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0965,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.0512
+      },
+      "output": {
+        "peak": 0.561,
+        "rms_db": -17.3126,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.1136
+      },
+      "delta_rms_db": -4.2161,
+      "delta_noise_floor_db": 0.9376
+    },
+    {
+      "fixture": "male_low",
+      "preset": "bright_feminine",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0965,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.0512
+      },
+      "output": {
+        "peak": 0.5557,
+        "rms_db": -17.8741,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.1605
+      },
+      "delta_rms_db": -4.7776,
+      "delta_noise_floor_db": 0.8907
+    },
+    {
+      "fixture": "male_low",
+      "preset": "young_neutral",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0965,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.0512
+      },
+      "output": {
+        "peak": 0.4986,
+        "rms_db": -17.8973,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.1434
+      },
+      "delta_rms_db": -4.8008,
+      "delta_noise_floor_db": 0.9078
+    },
+    {
+      "fixture": "male_low",
+      "preset": "natural_low",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0965,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.0512
+      },
+      "output": {
+        "peak": 0.4984,
+        "rms_db": -17.1933,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.5845
+      },
+      "delta_rms_db": -4.0968,
+      "delta_noise_floor_db": 1.4667
+    },
+    {
+      "fixture": "male_low",
+      "preset": "ikemen_soft",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0965,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.0512
+      },
+      "output": {
+        "peak": 0.6063,
+        "rms_db": -15.802,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.4199
+      },
+      "delta_rms_db": -2.7055,
+      "delta_noise_floor_db": 1.6313
+    },
+    {
+      "fixture": "male_low",
+      "preset": "ikemen_deep",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0965,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.0512
+      },
+      "output": {
+        "peak": 0.5774,
+        "rms_db": -15.8876,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.7548
+      },
+      "delta_rms_db": -2.7911,
+      "delta_noise_floor_db": 1.2964
+    },
+    {
+      "fixture": "male_low",
+      "preset": "narrator",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0965,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.0512
+      },
+      "output": {
+        "peak": 0.6572,
+        "rms_db": -14.0136,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.8578
+      },
+      "delta_rms_db": -0.9171,
+      "delta_noise_floor_db": 1.1934
+    },
+    {
+      "fixture": "male_low",
+      "preset": "clear_streaming",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0965,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.0512
+      },
+      "output": {
+        "peak": 0.6466,
+        "rms_db": -16.083,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.4669
+      },
+      "delta_rms_db": -2.9865,
+      "delta_noise_floor_db": 1.5843
+    },
+    {
+      "fixture": "male_low",
+      "preset": "radio_voice",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0965,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.0512
+      },
+      "output": {
+        "peak": 0.7938,
+        "rms_db": -12.4276,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.9066
+      },
+      "delta_rms_db": 0.6689,
+      "delta_noise_floor_db": 1.1446
+    },
+    {
+      "fixture": "male_low",
+      "preset": "bright_high",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0965,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.0512
+      },
+      "output": {
+        "peak": 0.7432,
+        "rms_db": -14.9487,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.6762
+      },
+      "delta_rms_db": -1.8522,
+      "delta_noise_floor_db": 1.375
+    },
+    {
+      "fixture": "male_low",
+      "preset": "deep_cool",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0965,
+        "clip_rate": 0.0,
+        "noise_floor_db": -47.0512
+      },
+      "output": {
+        "peak": 0.5393,
+        "rms_db": -13.6016,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.9078
+      },
+      "delta_rms_db": -0.5051,
+      "delta_noise_floor_db": 1.1434
+    },
+    {
+      "fixture": "male_mid",
+      "preset": "neutral_clean",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0552,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5307
+      },
+      "output": {
+        "peak": 0.6429,
+        "rms_db": -17.964,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.9529
+      },
+      "delta_rms_db": -4.9088,
+      "delta_noise_floor_db": 0.5778
+    },
+    {
+      "fixture": "male_mid",
+      "preset": "soft_feminine",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0552,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5307
+      },
+      "output": {
+        "peak": 0.6285,
+        "rms_db": -16.6599,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.046
+      },
+      "delta_rms_db": -3.6047,
+      "delta_noise_floor_db": 0.4847
+    },
+    {
+      "fixture": "male_mid",
+      "preset": "bright_feminine",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0552,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5307
+      },
+      "output": {
+        "peak": 0.4424,
+        "rms_db": -19.0299,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.7615
+      },
+      "delta_rms_db": -5.9747,
+      "delta_noise_floor_db": 0.7692
+    },
+    {
+      "fixture": "male_mid",
+      "preset": "young_neutral",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0552,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5307
+      },
+      "output": {
+        "peak": 0.5589,
+        "rms_db": -17.5244,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.1974
+      },
+      "delta_rms_db": -4.4692,
+      "delta_noise_floor_db": 0.3333
+    },
+    {
+      "fixture": "male_mid",
+      "preset": "natural_low",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0552,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5307
+      },
+      "output": {
+        "peak": 0.6841,
+        "rms_db": -16.7608,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.3606
+      },
+      "delta_rms_db": -3.7056,
+      "delta_noise_floor_db": 1.1701
+    },
+    {
+      "fixture": "male_mid",
+      "preset": "ikemen_soft",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0552,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5307
+      },
+      "output": {
+        "peak": 0.7977,
+        "rms_db": -15.5587,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.7666
+      },
+      "delta_rms_db": -2.5035,
+      "delta_noise_floor_db": 0.7641
+    },
+    {
+      "fixture": "male_mid",
+      "preset": "ikemen_deep",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0552,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5307
+      },
+      "output": {
+        "peak": 0.7856,
+        "rms_db": -15.4301,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.8657
+      },
+      "delta_rms_db": -2.3749,
+      "delta_noise_floor_db": 0.665
+    },
+    {
+      "fixture": "male_mid",
+      "preset": "narrator",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0552,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5307
+      },
+      "output": {
+        "peak": 0.8414,
+        "rms_db": -13.6386,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.4927
+      },
+      "delta_rms_db": -0.5834,
+      "delta_noise_floor_db": 1.038
+    },
+    {
+      "fixture": "male_mid",
+      "preset": "clear_streaming",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0552,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5307
+      },
+      "output": {
+        "peak": 0.8913,
+        "rms_db": -15.2703,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.5656
+      },
+      "delta_rms_db": -2.2151,
+      "delta_noise_floor_db": 0.9651
+    },
+    {
+      "fixture": "male_mid",
+      "preset": "radio_voice",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0552,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5307
+      },
+      "output": {
+        "peak": 0.8913,
+        "rms_db": -12.5539,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.9487
+      },
+      "delta_rms_db": 0.5013,
+      "delta_noise_floor_db": 0.582
+    },
+    {
+      "fixture": "male_mid",
+      "preset": "bright_high",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0552,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5307
+      },
+      "output": {
+        "peak": 0.7595,
+        "rms_db": -15.0384,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.9388
+      },
+      "delta_rms_db": -1.9832,
+      "delta_noise_floor_db": 0.5919
+    },
+    {
+      "fixture": "male_mid",
+      "preset": "deep_cool",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.0552,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.5307
+      },
+      "output": {
+        "peak": 0.8101,
+        "rms_db": -13.9793,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.7977
+      },
+      "delta_rms_db": -0.9241,
+      "delta_noise_floor_db": 0.733
+    },
+    {
+      "fixture": "noisy_room",
+      "preset": "neutral_clean",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.6867,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.5024
+      },
+      "output": {
+        "peak": 0.6577,
+        "rms_db": -16.9964,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.0912
+      },
+      "delta_rms_db": -3.3097,
+      "delta_noise_floor_db": -1.5888
+    },
+    {
+      "fixture": "noisy_room",
+      "preset": "soft_feminine",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.6867,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.5024
+      },
+      "output": {
+        "peak": 0.4977,
+        "rms_db": -16.8801,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.2722
+      },
+      "delta_rms_db": -3.1934,
+      "delta_noise_floor_db": -1.7698
+    },
+    {
+      "fixture": "noisy_room",
+      "preset": "bright_feminine",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.6867,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.5024
+      },
+      "output": {
+        "peak": 0.3897,
+        "rms_db": -18.1515,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.9404
+      },
+      "delta_rms_db": -4.4648,
+      "delta_noise_floor_db": -1.438
+    },
+    {
+      "fixture": "noisy_room",
+      "preset": "young_neutral",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.6867,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.5024
+      },
+      "output": {
+        "peak": 0.4542,
+        "rms_db": -17.6126,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.8119
+      },
+      "delta_rms_db": -3.9259,
+      "delta_noise_floor_db": -2.3095
+    },
+    {
+      "fixture": "noisy_room",
+      "preset": "natural_low",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.6867,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.5024
+      },
+      "output": {
+        "peak": 0.5848,
+        "rms_db": -17.1594,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.3506
+      },
+      "delta_rms_db": -3.4727,
+      "delta_noise_floor_db": -0.8482
+    },
+    {
+      "fixture": "noisy_room",
+      "preset": "ikemen_soft",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.6867,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.5024
+      },
+      "output": {
+        "peak": 0.6255,
+        "rms_db": -15.8014,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.6043
+      },
+      "delta_rms_db": -2.1147,
+      "delta_noise_floor_db": -1.1019
+    },
+    {
+      "fixture": "noisy_room",
+      "preset": "ikemen_deep",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.6867,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.5024
+      },
+      "output": {
+        "peak": 0.6847,
+        "rms_db": -15.645,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.5365
+      },
+      "delta_rms_db": -1.9583,
+      "delta_noise_floor_db": -1.0341
+    },
+    {
+      "fixture": "noisy_room",
+      "preset": "narrator",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.6867,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.5024
+      },
+      "output": {
+        "peak": 0.7796,
+        "rms_db": -13.8723,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.5781
+      },
+      "delta_rms_db": -0.1856,
+      "delta_noise_floor_db": -1.0757
+    },
+    {
+      "fixture": "noisy_room",
+      "preset": "clear_streaming",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.6867,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.5024
+      },
+      "output": {
+        "peak": 0.8541,
+        "rms_db": -15.656,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.4112
+      },
+      "delta_rms_db": -1.9693,
+      "delta_noise_floor_db": -0.9088
+    },
+    {
+      "fixture": "noisy_room",
+      "preset": "radio_voice",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.6867,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.5024
+      },
+      "output": {
+        "peak": 0.7467,
+        "rms_db": -12.715,
+        "clip_rate": 0.0,
+        "noise_floor_db": -46.0718
+      },
+      "delta_rms_db": 0.9717,
+      "delta_noise_floor_db": -1.5694
+    },
+    {
+      "fixture": "noisy_room",
+      "preset": "bright_high",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.6867,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.5024
+      },
+      "output": {
+        "peak": 0.626,
+        "rms_db": -15.2863,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.7556
+      },
+      "delta_rms_db": -1.5996,
+      "delta_noise_floor_db": -1.2532
+    },
+    {
+      "fixture": "noisy_room",
+      "preset": "deep_cool",
+      "input": {
+        "peak": 0.45,
+        "rms_db": -13.6867,
+        "clip_rate": 0.0,
+        "noise_floor_db": -44.5024
+      },
+      "output": {
+        "peak": 0.6178,
+        "rms_db": -14.1733,
+        "clip_rate": 0.0,
+        "noise_floor_db": -45.6842
+      },
+      "delta_rms_db": -0.4866,
+      "delta_noise_floor_db": -1.1818
+    }
+  ]
+}

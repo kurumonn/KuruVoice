@@ -26,6 +26,14 @@ formant_shift = -0.8
 # 加工音と原音のミックス（1.0 = 完全に加工音）。
 mix = 1.0
 
+[fluctuation]
+# 1/f ゆらぎ。微小なピッチ/音量の自然な揺らぎで機械っぽさを消す。
+enabled = false
+amount = 0.5
+pitch_cents = 12.0   # ピッチ揺れ幅(セント)
+amp_depth = 0.1      # 音量揺れの深さ
+rate_hz = 5.0        # 揺らぎの速さ
+
 [denoise]
 # 背景ノイズ低減（STFTスペクトル減算）。ノイズゲートとは別物。
 enabled = false

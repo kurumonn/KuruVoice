@@ -201,6 +201,14 @@ impl AudioProcessor for NoiseReducer {
         self.frames = 0;
         self.rover = FFT_SIZE - HOP;
     }
+
+    fn update_params(&mut self, cfg: &crate::config::AppConfig) {
+        self.enabled = cfg.denoise.enabled;
+        let amount = cfg.denoise.amount.clamp(0.0, 1.0);
+        self.amount = amount;
+        self.gmin = 10.0_f32.powf(-24.0 * amount / 20.0);
+        self.over = 1.0 + amount * 1.5;
+    }
 }
 
 #[cfg(test)]
