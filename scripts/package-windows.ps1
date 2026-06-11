@@ -1,7 +1,8 @@
 param(
     [string]$Target = "x86_64-pc-windows-msvc",
     [switch]$SkipBuild,
-    [switch]$Installer
+    [switch]$Installer,
+    [switch]$Sign
 )
 
 $ErrorActionPreference = "Stop"
@@ -26,6 +27,10 @@ try {
     $ExePath = Join-Path $Root "target\$Target\release\kuruvoice.exe"
     if (-not (Test-Path $ExePath)) {
         throw "Built exe was not found: $ExePath"
+    }
+
+    if ($Sign) {
+        & (Join-Path $PSScriptRoot "sign-windows.ps1") -FilePath $ExePath
     }
 
     New-Item -ItemType Directory -Force $Dist | Out-Null
@@ -75,6 +80,9 @@ try {
         $installerPath = Join-Path $Dist "$ReleaseName.exe"
         $builtInstaller = Get-ChildItem $Dist -Filter "KuruVoiceSetup-v$Version-windows-x64.exe" | Select-Object -First 1
         if ($builtInstaller) {
+            if ($Sign) {
+                & (Join-Path $PSScriptRoot "sign-windows.ps1") -FilePath $builtInstaller.FullName
+            }
             $InstallerHash = (Get-FileHash $builtInstaller.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             "$InstallerHash  $($builtInstaller.Name)" | Out-File "$($builtInstaller.FullName).sha256" -Encoding ascii
             Write-Host "Created: $($builtInstaller.FullName)"

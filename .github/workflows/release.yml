@@ -81,6 +81,34 @@ jobs:
       - name: Build
         run: cargo build --release --target ${{ matrix.target }}
 
+      - name: Prepare Windows signing certificate
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_CERTIFICATE_BASE64)) {
+            "KURUVOICE_SIGNING_ENABLED=false" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+            Write-Host "WINDOWS_CERTIFICATE_BASE64 is not set. Windows assets will be unsigned."
+            exit 0
+          }
+          $certPath = Join-Path $env:RUNNER_TEMP "kuruvoice-signing.pfx"
+          [IO.File]::WriteAllBytes($certPath, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_BASE64))
+          "KURUVOICE_SIGNING_ENABLED=true" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "KURUVOICE_SIGNING_CERT=$certPath" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Sign Windows exe
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          KURUVOICE_SIGNING_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          if ($env:KURUVOICE_SIGNING_ENABLED -ne "true") {
+            Write-Host "Skipping Windows exe signing."
+            exit 0
+          }
+          .\scripts\sign-windows.ps1 -FilePath "target\${{ matrix.target }}\release\kuruvoice.exe"
+
       - name: Package (Unix)
         if: runner.os != 'Windows'
         shell: bash
@@ -134,6 +162,31 @@ jobs:
           }
           & $iscc "installer\kuruvoice.iss"
           $installer = Get-ChildItem dist -Filter "KuruVoiceSetup-v$version-windows-x64.exe" | Select-Object -First 1
+          if (-not $installer) {
+            throw "Installer was not created."
+          }
+
+      - name: Sign Windows installer
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          KURUVOICE_SIGNING_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          if ($env:KURUVOICE_SIGNING_ENABLED -ne "true") {
+            Write-Host "Skipping Windows installer signing."
+            exit 0
+          }
+          $installer = Get-ChildItem dist -Filter "KuruVoiceSetup-*.exe" | Select-Object -First 1
+          if (-not $installer) {
+            throw "Installer was not created."
+          }
+          .\scripts\sign-windows.ps1 -FilePath $installer.FullName
+
+      - name: Hash Windows installer
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem dist -Filter "KuruVoiceSetup-*.exe" | Select-Object -First 1
           if (-not $installer) {
             throw "Installer was not created."
           }

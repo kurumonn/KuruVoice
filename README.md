@@ -286,7 +286,9 @@ Windows 向けには次の2種類を公開します。
 .\scripts\package-windows.ps1 -Installer  # Inno Setup 6 が必要
 ```
 
-詳しい手順は [docs/distribution.md](docs/distribution.md) を参照してください。
+署名証明書がある場合は `.\scripts\package-windows.ps1 -Installer -Sign` で署名済み配布物を作れます。
+
+詳しい手順は [docs/distribution.md](docs/distribution.md) と [docs/code_signing.md](docs/code_signing.md) を参照してください。
 
 ---
 

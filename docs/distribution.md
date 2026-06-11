@@ -37,6 +37,14 @@ winget install --id JRSoftware.InnoSetup -e
 
 生成物は `dist/` に出力されます。
 
+コード署名証明書がある場合は、署名済み配布物も作成できます。
+
+```powershell
+$env:KURUVOICE_SIGNING_CERT = "C:\path\to\kuruvoice-signing.pfx"
+$env:KURUVOICE_SIGNING_PASSWORD = "pfx-password"
+.\scripts\package-windows.ps1 -Installer -Sign
+```
+
 ## GitHub Release で配布する
 
 1. `Cargo.toml` の `version` とリリース内容を確認する
@@ -55,3 +63,5 @@ Actions の `Release` workflow が成功すると、該当タグの GitHub Relea
 未署名の exe / installer は Windows SmartScreen で警告されることがあります。初期配布では README や Release note に「未署名のため警告が出る可能性がある」ことを明記し、`.sha256` を併記してください。
 
 一般ユーザー向けの次段階はコード署名です。その後、必要に応じて winget / Scoop への登録を検討します。
+
+コード署名の設定は [docs/code_signing.md](code_signing.md) を参照してください。
