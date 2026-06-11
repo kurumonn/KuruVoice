@@ -1,6 +1,6 @@
 [package]
 name = "kuruvoice"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "KuruVoice - 軽量リアルタイム・イケメンボイスチェンジャー (DSP voice changer with dashboard UI)"
 license = "MIT OR Apache-2.0"
