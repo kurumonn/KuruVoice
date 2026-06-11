@@ -53,11 +53,10 @@ impl AudioProcessor for OnnxInferenceBlock {
     }
 
     fn process(&mut self, _buffer: &mut [f32]) {
-        if !self.enabled {
-            return;
+        if self.enabled {
+            // TODO: バッファを推論スレッドに送り、出力をバッファに書き戻す。
+            // 現状は identity（スタブ）なので何もしない。
         }
-        // TODO: バッファを推論スレッドに送り、出力をバッファに書き戻す。
-        // 現状は identity（スタブ）なので何もしない。
     }
 
     fn reset(&mut self) {}

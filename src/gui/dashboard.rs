@@ -859,9 +859,8 @@ impl Dashboard {
                     ui.horizontal_wrapped(|ui| {
                         for (name, path) in &self.user_presets {
                             let selected = self.config_path == path.to_string_lossy();
-                            let mut btn = egui::Button::new(
-                                egui::RichText::new(name.as_str()).small(),
-                            );
+                            let mut btn =
+                                egui::Button::new(egui::RichText::new(name.as_str()).small());
                             if selected {
                                 btn = btn.fill(ACCENT_DARK);
                             }
@@ -878,9 +877,7 @@ impl Dashboard {
                             self.config = cfg;
                             self.status = format!(
                                 "プリセット読込: {}",
-                                path.file_stem()
-                                    .and_then(|s| s.to_str())
-                                    .unwrap_or("?")
+                                path.file_stem().and_then(|s| s.to_str()).unwrap_or("?")
                             );
                             self.push_config();
                         }

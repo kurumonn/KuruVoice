@@ -98,10 +98,10 @@ impl DspChain {
             processor.process(buffer);
         }
 
-        for i in 0..len {
+        for (sample, dry_sample) in buffer.iter_mut().zip(self.dry_buf.iter()).take(len) {
             self.bypass_fade += (self.bypass_target - self.bypass_fade) * BYPASS_ALPHA;
             let fade = self.bypass_fade.clamp(0.0, 1.0);
-            buffer[i] = buffer[i] * (1.0 - fade) + self.dry_buf[i] * fade;
+            *sample = *sample * (1.0 - fade) + *dry_sample * fade;
         }
     }
 

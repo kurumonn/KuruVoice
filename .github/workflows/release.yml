@@ -1,4 +1,4 @@
-# T-010: GitHub Actions — タグ push で Windows / macOS / Linux バイナリを自動リリース。
+# T-010: GitHub Actions - タグ push で Windows / macOS / Linux バイナリを自動リリース。
 # T-013: CI ジョブで golden_report の絶対閾値チェックを実行する。
 
 name: Release
@@ -24,6 +24,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
       - name: Install ALSA (Linux)
         run: sudo apt-get update && sudo apt-get install -y libasound2-dev pkg-config
       - name: fmt
@@ -42,7 +44,7 @@ jobs:
           path: target/golden_report.json
 
   build:
-    name: build ${{ matrix.target }}
+    name: build ${{ matrix.asset_name }}
     needs: ci
     runs-on: ${{ matrix.os }}
     strategy:
@@ -51,12 +53,16 @@ jobs:
         include:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
+            asset_name: windows-x64
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
+            asset_name: linux-x64
           - os: macos-latest
             target: x86_64-apple-darwin
+            asset_name: macos-x64
           - os: macos-latest
             target: aarch64-apple-darwin
+            asset_name: macos-arm64
     steps:
       - uses: actions/checkout@v4
 
@@ -64,6 +70,9 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
 
       - name: Install ALSA (Linux)
         if: runner.os == 'Linux'
@@ -74,17 +83,77 @@ jobs:
 
       - name: Package (Unix)
         if: runner.os != 'Windows'
+        shell: bash
         run: |
-          cd target/${{ matrix.target }}/release
-          tar czf ../../../kuruvoice-${{ matrix.target }}.tar.gz kuruvoice
-      - name: Package (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          Compress-Archive -Path target/${{ matrix.target }}/release/kuruvoice.exe -DestinationPath kuruvoice-${{ matrix.target }}.zip
+          set -euo pipefail
+          archive="KuruVoice-${{ github.ref_name }}-${{ matrix.asset_name }}.tar.gz"
+          mkdir -p dist/KuruVoice
+          cp "target/${{ matrix.target }}/release/kuruvoice" dist/KuruVoice/
+          cp README.md dist/KuruVoice/
+          cp LICENSE dist/KuruVoice/ || true
+          cp config.example.toml dist/KuruVoice/ || true
+          cp -R docs dist/KuruVoice/docs
+          tar czf "$archive" -C dist KuruVoice
+          shasum -a 256 "$archive" > "$archive.sha256"
 
-      - name: Upload to release
+      - name: Package (Windows zip)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $archive = "KuruVoice-${{ github.ref_name }}-${{ matrix.asset_name }}.zip"
+          New-Item -ItemType Directory -Force dist\KuruVoice | Out-Null
+          Copy-Item "target\${{ matrix.target }}\release\kuruvoice.exe" dist\KuruVoice\
+          Copy-Item README.md dist\KuruVoice\
+          Copy-Item LICENSE dist\KuruVoice\ -ErrorAction SilentlyContinue
+          Copy-Item config.example.toml dist\KuruVoice\ -ErrorAction SilentlyContinue
+          Copy-Item docs dist\KuruVoice\docs -Recurse
+          Compress-Archive -Path dist\KuruVoice -DestinationPath $archive -Force
+          $hash = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $archive" | Out-File "$archive.sha256" -Encoding ascii
+
+      - name: Install Inno Setup (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
+      - name: Package (Windows installer)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          $env:KURUVOICE_VERSION = $version
+          $isccCandidates = @(
+            (Get-Command "ISCC.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1),
+            (Join-Path ${env:ProgramFiles(x86)} "Inno Setup 6\ISCC.exe"),
+            (Join-Path $env:ProgramFiles "Inno Setup 6\ISCC.exe"),
+            (Join-Path $env:LOCALAPPDATA "Programs\Inno Setup 6\ISCC.exe")
+          ) | Where-Object { $_ -and (Test-Path $_) }
+          $iscc = $isccCandidates | Select-Object -First 1
+          if (-not $iscc) {
+            throw "ISCC.exe was not found."
+          }
+          & $iscc "installer\kuruvoice.iss"
+          $installer = Get-ChildItem dist -Filter "KuruVoiceSetup-v$version-windows-x64.exe" | Select-Object -First 1
+          if (-not $installer) {
+            throw "Installer was not created."
+          }
+          $hash = (Get-FileHash $installer.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $($installer.Name)" | Out-File "$($installer.FullName).sha256" -Encoding ascii
+
+      - name: Upload Unix assets to release
+        if: runner.os != 'Windows'
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            kuruvoice-${{ matrix.target }}.tar.gz
-            kuruvoice-${{ matrix.target }}.zip
+            KuruVoice-${{ github.ref_name }}-${{ matrix.asset_name }}.tar.gz
+            KuruVoice-${{ github.ref_name }}-${{ matrix.asset_name }}.tar.gz.sha256
+
+      - name: Upload Windows assets to release
+        if: runner.os == 'Windows'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            KuruVoice-${{ github.ref_name }}-${{ matrix.asset_name }}.zip
+            KuruVoice-${{ github.ref_name }}-${{ matrix.asset_name }}.zip.sha256
+            dist/KuruVoiceSetup-*.exe
+            dist/KuruVoiceSetup-*.exe.sha256

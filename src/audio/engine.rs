@@ -219,7 +219,7 @@ impl Engine {
         let in_cfg = cpal::StreamConfig {
             channels: in_channels,
             sample_rate: in_sample_rate,
-            buffer_size: buf_size.clone(),
+            buffer_size: buf_size,
         };
         let out_cfg = cpal::StreamConfig {
             channels: out_channels,
@@ -246,9 +246,14 @@ impl Engine {
             build_input_stream(in_device, &in_cfg, in_channels as usize, in_format, in_prod)
                 .map_err(|e| KuruError::StreamBuildError(format!("入力: {e}")))?;
 
-        let out_stream =
-            build_output_stream(out_device, &out_cfg, out_channels as usize, out_format, out_cons)
-                .map_err(|e| KuruError::StreamBuildError(format!("出力: {e}")))?;
+        let out_stream = build_output_stream(
+            out_device,
+            &out_cfg,
+            out_channels as usize,
+            out_format,
+            out_cons,
+        )
+        .map_err(|e| KuruError::StreamBuildError(format!("出力: {e}")))?;
 
         // ---- 処理スレッド ----
         let stop = Arc::new(AtomicBool::new(false));

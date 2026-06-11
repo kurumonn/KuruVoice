@@ -7,7 +7,7 @@
 マイクの声を低遅延で加工し、「整った低音・爽やか・聞き取りやすい声」に補正します。
 配信(OBS) / 通話(Discord) / VRChat などにそのまま使えます。
 
-[導入方法](#-導入方法クイックスタート) ・ [使い方](#-使い方) ・ [プリセット](#-プリセット) ・ [配信連携](#-配信連携obs--discord--vrchat) ・ [仕組み](#-仕組み) ・ [開発](#-開発)
+[導入方法](#-導入方法クイックスタート) ・ [使い方](#-使い方) ・ [プリセット](#-プリセット) ・ [配信連携](#-配信連携obs--discord--vrchat) ・ [仕組み](#-仕組み) ・ [配布](#-配布) ・ [開発](#-開発)
 
 </div>
 
@@ -37,7 +37,23 @@
 
 ## 🚀 導入方法（クイックスタート）
 
-### 1. 前提：Rust ツールチェインを入れる
+### 1. 配布版を使う（Windows 推奨）
+
+Windows では GitHub Releases からインストーラーまたは zip をダウンロードして使えます。
+
+1. [Releases](https://github.com/kurumonn/KuruVoice/releases) を開く
+2. 最新版の `KuruVoiceSetup-vX.Y.Z-windows-x64.exe` をダウンロード
+3. インストーラーを実行して KuruVoice を起動
+
+zip で使いたい場合は `KuruVoice-vX.Y.Z-windows-x64.zip` を展開し、`kuruvoice.exe` を実行してください。
+
+> [!IMPORTANT]
+> 初期配布の exe は未署名のため、Windows SmartScreen で警告が出る場合があります。
+> ファイルの確認用に Release Assets の `.sha256` も併せて公開しています。
+
+### 2. ソースからビルドする
+
+開発版を試す場合や Linux / macOS で使う場合は、Rust ツールチェインを入れてビルドします。
 
 Rust（1.75 以上）が必要です。未インストールなら [rustup](https://rustup.rs/) から入れます。
 
@@ -69,7 +85,7 @@ xcode-select --install   # 未導入なら
 ```
 </details>
 
-### 2. 取得してビルド
+#### 取得してビルド
 
 ```bash
 git clone https://github.com/kurumonn/KuruVoice.git
@@ -79,7 +95,7 @@ cargo build --release
 
 > 初回ビルドは依存（egui / cpal など）のコンパイルで数分かかります。2 回目以降は数秒です。
 
-### 3. 起動
+#### 起動
 
 ```bash
 # ① まず使えるデバイスを確認
@@ -254,6 +270,26 @@ DC カット
 
 ---
 
+## 📦 配布
+
+タグ `v*` を push すると GitHub Actions が Windows / Linux / macOS 向けにビルドし、GitHub Release に配布物をアップロードします。
+
+Windows 向けには次の2種類を公開します。
+
+- `KuruVoiceSetup-vX.Y.Z-windows-x64.exe`: 一般ユーザー向けインストーラー
+- `KuruVoice-vX.Y.Z-windows-x64.zip`: 展開してすぐ使える zip
+
+ローカルで Windows 配布物を作る場合:
+
+```powershell
+.\scripts\package-windows.ps1
+.\scripts\package-windows.ps1 -Installer  # Inno Setup 6 が必要
+```
+
+詳しい手順は [docs/distribution.md](docs/distribution.md) を参照してください。
+
+---
+
 ## 🛠 開発
 
 ```bash
@@ -263,7 +299,7 @@ cargo test
 ```
 
 - 単体・結合テスト同梱（dB 変換 / ピッチ比 / チェーン / バイパス / リミッター天井 / 設定 / プリセット）
-- CI（fmt / clippy / test / build）と Release（各 OS バイナリ）は GitHub Actions に設定済み
+- CI（fmt / clippy / test / build）と Release（各 OS バイナリ / Windows インストーラー）は GitHub Actions に設定済み
 - コントリビュート方法は [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---

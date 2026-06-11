@@ -186,9 +186,8 @@ impl AudioProcessor for Fluctuation {
         self.rate_hz = cfg.fluctuation.rate_hz.clamp(0.1, 20.0);
         if self.sample_rate > 0.0 {
             self.lp_coeff = time_to_coeff(1000.0 / self.rate_hz, self.sample_rate);
-            let depth = self.pitch_cents * self.sample_rate
-                / (1731.0 * TAU * self.rate_hz)
-                * self.amount;
+            let depth =
+                self.pitch_cents * self.sample_rate / (1731.0 * TAU * self.rate_hz) * self.amount;
             self.depth_samples = depth.clamp(0.0, 200.0);
             self.base_delay = self.depth_samples + 16.0;
         }
